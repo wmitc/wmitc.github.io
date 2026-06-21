@@ -1,2 +1,2 @@
 # wmitc.github.io
-Personal website, portfolio, and blog
+Personal website, portfolio, and blog.

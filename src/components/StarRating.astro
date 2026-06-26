@@ -1,0 +1,50 @@
+---
+// Renders a 0-5 rating in half-star steps.
+interface Props {
+  rating: number;
+}
+const { rating } = Astro.props;
+const clamped = Math.max(0, Math.min(5, rating));
+const full = Math.floor(clamped);
+const hasHalf = clamped - full >= 0.5;
+const label = `${clamped} out of 5 stars`;
+---
+
+<span class="stars" role="img" aria-label={label} title={label}>
+  {
+    Array.from({ length: 5 }).map((_, i) => {
+      const state =
+        i < full ? "full" : i === full && hasHalf ? "half" : "empty";
+      return <span class={`star ${state}`} aria-hidden="true">★</span>;
+    })
+  }
+</span>
+
+<style>
+  .stars {
+    display: inline-flex;
+    gap: 1px;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .star {
+    position: relative;
+    color: var(--border);
+  }
+  .star.full {
+    color: #f5a623;
+  }
+  /* Half star: gold left half over a grey base. */
+  .star.half {
+    color: var(--border);
+  }
+  .star.half::before {
+    content: "★";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    overflow: hidden;
+    color: #f5a623;
+  }
+</style>

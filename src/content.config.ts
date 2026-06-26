@@ -17,4 +17,19 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { projects };
+// Reading list, edited as a single JSON data file: src/data/books.json
+const books = defineCollection({
+  loader: file("src/data/books.json"),
+  schema: z.object({
+    title: z.string(),
+    author: z.string(),
+    // Rating out of 5, in half-star steps (e.g. 4.5).
+    rating: z.number().min(0).max(5),
+    yearRead: z.number().optional(),
+    genre: z.string().optional(),
+    notes: z.string().optional(),
+    favorite: z.boolean().default(false),
+  }),
+});
+
+export const collections = { projects, books };

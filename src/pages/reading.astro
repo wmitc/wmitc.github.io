@@ -1,0 +1,92 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import StarRating from "../components/StarRating.astro";
+
+// Sort by rating (high to low), then title.
+const books = (await getCollection("books")).sort((a, b) => {
+  if (b.data.rating !== a.data.rating) return b.data.rating - a.data.rating;
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+
+<BaseLayout title="Reading" description="Books I've read, with ratings and notes.">
+  <header class="page-head">
+    <h1>Reading</h1>
+    <p class="muted">
+      Books I've read, with a star rating and a short note. ★ = 5-star scale,
+      half-stars allowed.
+    </p>
+  </header>
+
+  <ul class="books">
+    {
+      books.map((b) => (
+        <li class="book card">
+          <div class="top">
+            <div>
+              <h2>
+                {b.data.title}
+                {b.data.favorite && (
+                  <span class="fav" title="Favorite" aria-label="Favorite">
+                    ♥
+                  </span>
+                )}
+              </h2>
+              <p class="byline muted">
+                {b.data.author}
+                {b.data.yearRead && <span> · read {b.data.yearRead}</span>}
+                {b.data.genre && <span> · {b.data.genre}</span>}
+              </p>
+            </div>
+            <StarRating rating={b.data.rating} />
+          </div>
+          {b.data.notes && <p class="notes muted">{b.data.notes}</p>}
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: 1.75rem;
+  }
+  .page-head h1 {
+    margin: 0 0 0.35rem;
+  }
+  .page-head p {
+    margin: 0;
+  }
+  .books {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .book .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .book h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+  .fav {
+    color: #e25563;
+    font-size: 0.9rem;
+    margin-left: 0.35rem;
+  }
+  .byline {
+    margin: 0.2rem 0 0;
+    font-size: 0.9rem;
+  }
+  .notes {
+    margin: 0.75rem 0 0;
+    font-size: 0.95rem;
+  }
+</style>

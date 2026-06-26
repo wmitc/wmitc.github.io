@@ -1,0 +1,90 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+---
+
+<BaseLayout title="Blog" description="Notes on markets, code, and probability.">
+  <header class="page-head">
+    <h1>Blog</h1>
+    <p class="muted">Occasional notes on markets, code, and whatever else.</p>
+  </header>
+
+  {posts.length === 0 && <p class="muted">No posts yet — check back soon.</p>}
+
+  <ul class="posts">
+    {
+      posts.map((p) => (
+        <li class="post">
+          <a class="title" href={`/blog/${p.id}/`}>
+            {p.data.title}
+          </a>
+          <div class="meta muted">
+            <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+            {p.data.tags.length > 0 && (
+              <span class="tags">
+                {p.data.tags.map((t) => (
+                  <span class="tag">{t}</span>
+                ))}
+              </span>
+            )}
+          </div>
+          {p.data.description && <p class="muted desc">{p.data.description}</p>}
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: 1.75rem;
+  }
+  .page-head h1 {
+    margin: 0 0 0.35rem;
+  }
+  .page-head p {
+    margin: 0;
+  }
+  .posts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .title {
+    font-size: 1.25rem;
+    font-weight: 650;
+    color: var(--text);
+  }
+  .title:hover {
+    color: var(--accent);
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+    font-size: 0.9rem;
+  }
+  .tags {
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+  .desc {
+    margin: 0.5rem 0 0;
+  }
+</style>

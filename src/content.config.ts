@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { file } from "astro/loaders";
+import { file, glob } from "astro/loaders";
 
 // Projects are edited as a single JSON data file: src/data/projects.json
 const projects = defineCollection({
@@ -32,4 +32,16 @@ const books = defineCollection({
   }),
 });
 
-export const collections = { projects, books };
+// Blog posts: Markdown files in src/content/posts/
+const posts = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "src/content/posts" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    date: z.coerce.date(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { projects, books, posts };

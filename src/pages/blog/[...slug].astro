@@ -1,0 +1,95 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article class="post">
+    <a class="back" href="/blog/">← Blog</a>
+    <h1>{post.data.title}</h1>
+    <div class="meta muted">
+      <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time>
+      {
+        post.data.tags.length > 0 && (
+          <span class="tags">
+            {post.data.tags.map((t) => (
+              <span class="tag">{t}</span>
+            ))}
+          </span>
+        )
+      }
+    </div>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post {
+    max-width: 44rem;
+  }
+  .back {
+    display: inline-block;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  .post h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.6rem, 4vw, 2.25rem);
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  .tags {
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+  .prose :global(h2) {
+    margin-top: 2rem;
+  }
+  .prose :global(p) {
+    margin: 1rem 0;
+  }
+  .prose :global(ul) {
+    padding-left: 1.25rem;
+  }
+  .prose :global(li) {
+    margin: 0.35rem 0;
+  }
+  .prose :global(pre) {
+    padding: 1rem;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    border: 1px solid var(--border);
+  }
+  .prose :global(code) {
+    font-size: 0.9em;
+  }
+  .prose :global(a) {
+    text-decoration: underline;
+  }
+</style>

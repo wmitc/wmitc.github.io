@@ -1,0 +1,31 @@
+[
+  {
+    "id": "fortunes-formula",
+    "title": "Fortune's Formula",
+    "author": "William Poundstone",
+    "rating": 4.5,
+    "yearRead": 2024,
+    "genre": "Finance",
+    "notes": "The story of the Kelly criterion, information theory, and the gamblers and quants who used it. Great narrative intro to sizing bets.",
+    "favorite": true
+  },
+  {
+    "id": "man-for-all-markets",
+    "title": "A Man for All Markets",
+    "author": "Edward O. Thorp",
+    "rating": 5,
+    "yearRead": 2024,
+    "genre": "Finance",
+    "notes": "Thorp's memoir — beating blackjack, then the market. A model for thinking about edge and risk.",
+    "favorite": true
+  },
+  {
+    "id": "thinking-fast-slow",
+    "title": "Thinking, Fast and Slow",
+    "author": "Daniel Kahneman",
+    "rating": 4,
+    "yearRead": 2023,
+    "genre": "Psychology",
+    "notes": "Foundational on cognitive biases. A bit long, but the core ideas matter for decision-making under uncertainty."
+  }
+]

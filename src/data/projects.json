@@ -1,0 +1,41 @@
+[
+  {
+    "id": "82-0-solver",
+    "name": "82-0 Solver",
+    "description": "Automated solvers for the viral basketball roster game 82-0.com. Two agents reach a perfect 82-0 season by different philosophies: one guarantees the win by controlling the game's randomness, the other wins legitimately through fast repeated attempts. Includes the reverse-engineering and tooling behind them.",
+    "tech": ["JavaScript", "Reverse engineering", "Optimization"],
+    "githubUrl": "https://github.com/wmitc/82-0_Solver",
+    "featured": true,
+    "order": 10
+  },
+  {
+    "id": "escape-transylvania",
+    "name": "Escape Transylvania",
+    "description": "A browser-based point-and-click escape room set in Castle Dracula. Explore rooms, inspect and collect objects, and solve puzzles to escape before dawn. Progress is saved locally.",
+    "tech": ["React", "Vite", "TypeScript", "Zustand"],
+    "githubUrl": "https://github.com/wmitc/escape-transylvania",
+    "liveUrl": "/games/escape/",
+    "featured": true,
+    "order": 20
+  },
+  {
+    "id": "jung-game",
+    "name": "Yung Hung Jung: Rent's Due",
+    "description": "A browser puzzle-platformer. Yung Hung Jung is behind on rent — hustle through 10 levels, dodge the landlord's collectors, and grab the cash at the end of each one.",
+    "tech": ["JavaScript", "HTML5 Canvas"],
+    "githubUrl": "https://github.com/wmitc/jung-game",
+    "liveUrl": "/games/jung/",
+    "featured": false,
+    "order": 30
+  },
+  {
+    "id": "alexa-game",
+    "name": "Alexa's Bed Bug Battle",
+    "description": "A 2D puzzle platformer across 10 hand-built levels, packed into a single self-contained HTML file with no build step — music and sound effects are generated procedurally with the Web Audio API.",
+    "tech": ["JavaScript", "Web Audio API", "HTML5 Canvas"],
+    "githubUrl": "https://github.com/wmitc/alexa-game",
+    "liveUrl": "/games/alexa/",
+    "featured": false,
+    "order": 40
+  }
+]

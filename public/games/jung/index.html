@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yung Hung Jung: Rent's Due</title>
+<style>
+  :root {
+    --bg: #1a1230;
+    --panel: #241a42;
+    --ink: #f4e9ff;
+    --accent: #ffd23f;
+    --green: #3ddc84;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at 50% 20%, #2a1d52, #120c24 70%);
+    color: var(--ink);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+  }
+  #wrap {
+    position: relative;
+  }
+  #game {
+    background: #0e0a1d;
+    border: 3px solid var(--accent);
+    border-radius: 10px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.6);
+    display: block;
+    image-rendering: pixelated;
+  }
+  #hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 960px;
+    padding: 8px 4px;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+  #hud .pill {
+    background: var(--panel);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  #hud .pill b { color: var(--accent); }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background: rgba(14, 10, 29, 0.92);
+    border-radius: 10px;
+    padding: 30px;
+    gap: 16px;
+  }
+  .overlay.hidden { display: none; }
+  .hidden { display: none; }
+  .overlay h1 {
+    font-size: 38px;
+    color: var(--accent);
+    text-shadow: 0 3px 0 #00000055;
+    line-height: 1.1;
+  }
+  .overlay h2 { font-size: 26px; color: var(--green); }
+  .overlay p { max-width: 540px; font-size: 16px; line-height: 1.5; opacity: 0.9; }
+  .btn {
+    background: var(--accent);
+    color: #2a1d00;
+    border: none;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 12px 28px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 0 #b8920b;
+    transition: transform 0.05s;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #b8920b; }
+  .keys { font-size: 14px; opacity: 0.75; }
+  .keys kbd {
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-bottom-width: 3px;
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-family: monospace;
+    margin: 0 2px;
+  }
+  .rent-bar {
+    width: 320px;
+    height: 20px;
+    background: var(--panel);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .rent-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--accent));
+    transition: width 0.4s ease;
+  }
+  .hud-group { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    background: var(--panel);
+    color: var(--ink);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    width: 34px; height: 34px;
+    font-size: 16px; cursor: pointer; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit;
+  }
+  .icon-btn:hover { background: #322556; }
+  .menu-btns { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .btn.secondary {
+    background: var(--panel); color: var(--ink);
+    box-shadow: 0 4px 0 #15102b; border: 1px solid rgba(255,255,255,0.15);
+  }
+  .btn.secondary:active { box-shadow: 0 1px 0 #15102b; }
+  .level-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 12px; margin: 10px 0;
+  }
+  .level-cell {
+    width: 78px; height: 70px; border-radius: 10px;
+    background: var(--panel); border: 2px solid rgba(255,255,255,0.15);
+    color: var(--ink); cursor: pointer; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; transition: transform 0.05s;
+  }
+  .level-cell:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .level-cell .num { font-size: 22px; font-weight: bold; color: var(--accent); }
+  .level-cell .nm { font-size: 9px; opacity: 0.7; text-align: center; padding: 0 4px; line-height: 1.1; }
+  .level-cell .done { color: var(--green); font-size: 12px; height: 12px; }
+  .level-cell.locked { opacity: 0.4; cursor: not-allowed; border-style: dashed; }
+  .level-cell.locked:hover { border-color: rgba(255,255,255,0.15); transform: none; }
+  .level-cell.locked .num { color: var(--ink); font-size: 18px; }
+</style>
+</head>
+<body>
+  <div id="hud">
+    <div class="hud-group">
+      <span class="pill">Level <b id="lvl">1</b> / 10</span>
+      <span class="pill">💰 <b id="cash">$0</b> / $10</span>
+      <span class="pill">🪙 <b id="coins">0</b></span>
+      <span class="pill">⏱ <b id="timer">0.0s</b></span>
+    </div>
+    <div class="hud-group">
+      <button class="icon-btn" id="muteBtn" title="Toggle music">🔊</button>
+      <button class="icon-btn" id="menuBtn" title="Main menu">☰</button>
+    </div>
+  </div>
+
+  <div id="wrap">
+    <canvas id="game" width="960" height="520"></canvas>
+
+    <div id="mainMenu" class="overlay">
+      <h1>YUNG HUNG JUNG<br>Rent's Due 💸</h1>
+      <p>Yung Hung Jung is behind on rent. Hustle through 10 puzzle-platforming levels,
+         dodge the landlord's collectors, and grab the dollar at the end of each one.
+         Ten dollars and he's off the hook!</p>
+      <div class="keys">
+        Move <kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd> &nbsp;•&nbsp;
+        Jump <kbd>↑</kbd> / <kbd>W</kbd> / <kbd>Space</kbd> &nbsp;•&nbsp;
+        Restart <kbd>R</kbd> &nbsp;•&nbsp;
+        Pause <kbd>Esc</kbd>
+      </div>
+      <div class="menu-btns">
+        <button class="btn hidden" id="continueBtn">Continue</button>
+        <button class="btn" id="startBtn">Start Hustling</button>
+        <button class="btn secondary" id="selectBtn">Level Select</button>
+      </div>
+    </div>
+
+    <div id="levelSelect" class="overlay hidden">
+      <h2>Select a Level</h2>
+      <div class="level-grid" id="levelGrid"></div>
+      <div class="hud-group">
+        <button class="btn secondary" id="backBtn">← Back</button>
+        <button class="btn secondary" id="resetBtn">Reset Progress</button>
+      </div>
+    </div>
+
+    <div id="levelClear" class="overlay hidden">
+      <h2 id="clearMsg">Dollar secured! 💵</h2>
+      <p id="clearSub"></p>
+      <button class="btn" id="nextBtn">Next Level →</button>
+    </div>
+
+    <div id="winScreen" class="overlay hidden">
+      <h1>RENT PAID! 🎉</h1>
+      <div class="rent-bar"><div class="rent-fill" id="rentFill"></div></div>
+      <p id="winMsg"></p>
+      <div class="menu-btns">
+        <button class="btn" id="replayBtn">Play Again</button>
+        <button class="btn secondary" id="winMenuBtn">Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+const TILE = 40;
+
+// ---------- Input ----------
+const keys = {};
+const KEYMAP = {
+  ArrowLeft:'left', KeyA:'left',
+  ArrowRight:'right', KeyD:'right',
+  ArrowUp:'jump', KeyW:'jump', Space:'jump',
+  KeyR:'restart'
+};
+addEventListener('keydown', e => {
+  if (e.code === 'Escape') {            // toggle pause <-> continue
+    if (state.running) pauseToMenu();
+    else if (state.paused) continueGame();
+    e.preventDefault();
+    return;
+  }
+  if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = true; e.preventDefault(); }
+});
+addEventListener('keyup', e => {
+  if (KEYMAP[e.code]) { keys[KEYMAP[e.code]] = false; e.preventDefault(); }
+});
+
+// ---------- Levels ----------
+// Legend:
+//  # solid block      = ground/wall
+//  . empty
+//  P player start
+//  $ the dollar (goal)
+//  ^ spike (deadly)
+//  K key              D door (locked until key collected)
+//  B button (toggles) g gate (moves when button held/pressed)
+//  o pushable crate
+//  M moving platform (horizontal)   N moving platform (vertical)
+//  E patrolling enemy (deadly on contact)
+//  C coin (optional flavor, small bonus)
+// Each map is exactly 24 columns wide and 13 rows tall (960 x 520 px).
+const LEVELS = [
+  {
+    name: "Level 1 — Out the Door",
+    hint: "Spikes, pits, and two collectors. Welcome to rent week.",
+    map: [
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "............C...........",
+      "...........###..........",
+      "........................",
+      "......................$.",
+      ".P.E^.......^.....E^.###",
+      "########..#####..#######",
+    ]
+  },
+  {
+    name: "Level 2 — Mind the Gap",
+    hint: "Three pits, three collectors. Keep moving or get collected.",
+    map: [
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "............###.........",
+      ".......C................",
+      "......###...............",
+      "........................",
+      "........................",
+      ".PE....^E.....E......^.$",
+      "####..####..#####..#####",
+    ]
+  },
+  {
+    name: "Level 3 — Locked Out",
+    hint: "Cross, climb up-left for the key, then back to the guarded vault.",
+    map: [
+      "..................#.....",
+      "..K...............#.....",
+      ".###..............#.....",
+      "...###............#.....",
+      "..................#.....",
+      ".....###..........#.....",
+      ".........C........#.....",
+      "........###.......#.....",
+      "..................#.....",
+      "...........###....D.....",
+      "..................D.....",
+      ".P..#.E..#....^.^.D.^E.$",
+      "########################",
+    ]
+  },
+  {
+    name: "Level 4 — Push & Leap",
+    hint: "Crate to the plateau, then hop ledge-to-ledge over the spikes.",
+    map: [
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "......................$.",
+      "......................##",
+      "......................##",
+      "...........###..##..##..",
+      "...........###..##..##..",
+      ".....C.....###..##..##..",
+      "...........###..##..##..",
+      ".P......o..###^^##^^##^.",
+      "########################",
+    ]
+  },
+  {
+    name: "Level 5 — The Long Hustle",
+    hint: "Climb for the key, leap the pit, dodge the collector.",
+    map: [
+      ".......######...........",
+      "............#...........",
+      "......K.....#...........",
+      ".....###....#...........",
+      "............#...........",
+      "..###.......#...........",
+      "............#...........",
+      ".....###....#...........",
+      "............#...........",
+      "..###.......D...........",
+      "............D...........",
+      ".P..........D.......^.E$",
+      "################...#####",
+    ]
+  },
+  {
+    name: "Level 6 — Over the Edge",
+    hint: "Key first, then three pits and a guarded vault. Brutal.",
+    map: [
+      "................#.......",
+      "................#.......",
+      "................#.......",
+      "................#.......",
+      "................#.......",
+      "................#.......",
+      ".K..............#.......",
+      ".##.............#.......",
+      "................#.......",
+      "..##............D.......",
+      "................D.......",
+      ".P......E...^...D.^.E..$",
+      "#####..##..##..#########",
+    ]
+  },
+  {
+    name: "Level 7 — Catch the Ride",
+    hint: "Two slow platforms, spikes at every edge, a collector between.",
+    map: [
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      "........................",
+      ".......C................",
+      ".......M........M.......",
+      "........................",
+      ".P..^......E^.......^.$.",
+      "#####.....####.....#####",
+    ]
+  },
+  {
+    name: "Level 8 — Going Up",
+    hint: "Two collectors own the platforms. The spike field owns everything else.",
+    map: [
+      "..................$.....",
+      ".................###....",
+      "........................",
+      "..............##........",
+      "..........E.............",
+      ".........####...........",
+      ".....E..................",
+      "....####................",
+      "..C.....................",
+      ".###....................",
+      "........................",
+      ".P..^^^^^^^^^^^^^^^^^^..",
+      "########################",
+    ]
+  },
+  {
+    name: "Level 9 — Key Courier",
+    hint: "Ride across, climb a detour for the key, then the spiked vault.",
+    map: [
+      "..................#.....",
+      "..................#.....",
+      "..................#.....",
+      "..................#.....",
+      "..................#.....",
+      "................###.....",
+      "................K.#.....",
+      ".............###..#.....",
+      "........C.........#.....",
+      "........M.........D.....",
+      ".............##...D.....",
+      ".P...........^^.E.D.^^.$",
+      "######......############",
+    ]
+  },
+  {
+    name: "Level 10 — Rent Day",
+    hint: "The full gauntlet: spikes, collectors, a ride, a climb, a guarded vault. One run, no mistakes.",
+    map: [
+      "..................#.....",
+      "..................#.....",
+      "..................#.....",
+      "..................#.....",
+      "..............K...#.....",
+      "..............##..#.....",
+      "..................#.....",
+      "...............##.#.....",
+      "...........C......#.....",
+      "...........M....##D.....",
+      "..................D.....",
+      ".PE^...E^.......E.D.^.E$",
+      "#####.###.....##########",
+    ]
+  },
+];
+
+// ---------- Game state ----------
+let state = {
+  levelIndex: 0,
+  cash: 0,
+  coins: 0,
+  coinsBanked: 0,   // coins safely banked from cleared levels (restored on death)
+  startTime: 0,
+  totalTime: 0,
+  running: false,
+  paused: false,    // a level is paused to the menu and can be resumed
+  pauseStart: 0,
+};
+
+let player, solids, spikes, dollar, keyItems, doors, crates, movers, coins, enemies, hasKey;
+let cameraShake = 0;
+let particles = [];
+
+function buildLevel(idx) {
+  const def = LEVELS[idx];
+  const map = def.map;
+  solids = [];
+  spikes = [];
+  doors = [];
+  keyItems = [];
+  crates = [];
+  movers = [];
+  coins = [];
+  enemies = [];
+  dollar = null;
+  hasKey = false;
+  particles = [];
+
+  for (let r = 0; r < map.length; r++) {
+    for (let c = 0; c < map[r].length; c++) {
+      const ch = map[r][c];
+      const x = c * TILE, y = r * TILE;
+      switch (ch) {
+        case '#': solids.push({x, y, w: TILE, h: TILE}); break;
+        case '^': spikes.push({x: x+4, y: y+TILE-16, w: TILE-8, h: 16}); break;
+        case 'P': player = makePlayer(x, y); break;
+        case '$': dollar = {x: x+6, y: y+2, w: TILE-12, h: TILE-4, bob: 0}; break;
+        case 'K': keyItems.push({x: x+8, y: y+8, w: TILE-16, h: TILE-16, taken: false, bob: 0}); break;
+        case 'D': doors.push({x, y, w: TILE, h: TILE}); break;
+        case 'o': crates.push({x: x+2, y: y+2, w: TILE-4, h: TILE-4, vx:0, vy:0}); break;
+        case 'C': coins.push({x: x+12, y: y+12, w: TILE-24, h: TILE-24, taken:false, bob:0}); break;
+        case 'M': movers.push(makeMover(x, y, 'h')); break;
+        case 'N': movers.push(makeMover(x, y, 'v')); break;
+        case 'E': enemies.push(makeEnemy(c, r)); break;
+      }
+    }
+  }
+  for (const e of enemies) computeEnemyBounds(e, map);
+  if (!player) player = makePlayer(TILE, TILE);
+}
+
+// A patrolling enemy walks its platform segment and is deadly on contact.
+// Fully deterministic (fixed speed + start dir) so behaviour is fair and reproducible.
+function makeEnemy(c, r) {
+  return {
+    col: c, row: r,
+    x: c*TILE + 4, y: (r+1)*TILE - 26,
+    w: TILE-8, h: 26,
+    speed: 2.6, dir: 1,
+    minX: c*TILE, maxX: c*TILE, anim: 0,
+  };
+}
+// Patrol limits = the contiguous walkable ground around the spawn (bounded by walls/ledges).
+function computeEnemyBounds(e, map) {
+  const r = e.row;
+  const walk = (col) => col >= 0 && col < map[r].length &&
+                        map[r+1] && map[r+1][col] === '#' &&
+                        map[r][col] !== '#' && map[r][col] !== 'D';
+  let left = e.col, right = e.col;
+  while (walk(left-1)) left--;
+  while (walk(right+1)) right++;
+  e.minX = left*TILE + 2;
+  e.maxX = (right+1)*TILE - 2 - e.w;
+}
+
+function makePlayer(x, y) {
+  return {
+    x: x+4, y: y+2, w: TILE-8, h: TILE-2,
+    vx: 0, vy: 0, onGround: false, facing: 1,
+    coyote: 0, jumpBuffer: 0, dead: false, win: false,
+    walkAnim: 0,
+  };
+}
+
+function makeMover(x, y, dir) {
+  return {
+    x, y, w: TILE * 1.5, h: TILE/2,
+    ox: x, oy: y, dir,
+    t: Math.random() * Math.PI * 2,
+    range: dir === 'h' ? TILE*2.5 : TILE*2,
+    speed: 0.006,
+    px: x, py: y, // previous pos for carrying player
+  };
+}
+
+// ---------- Physics helpers ----------
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x &&
+         a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function activeSolids() {
+  // walls + closed doors + crates + movers
+  let list = solids.slice();
+  if (!hasKey) for (const d of doors) list.push(d);
+  for (const cr of crates) list.push(cr);
+  for (const m of movers) list.push(m);
+  return list;
+}
+
+// Move an axis-aligned body with collision against a set of solid rects.
+function moveAndCollide(body, solidList) {
+  body.onGround = false;
+
+  // Horizontal
+  body.x += body.vx;
+  for (const s of solidList) {
+    if (s === body) continue;
+    if (rectsOverlap(body, s)) {
+      if (body.vx > 0) body.x = s.x - body.w;
+      else if (body.vx < 0) body.x = s.x + s.w;
+      body.vx = 0;
+    }
+  }
+  // Vertical
+  body.y += body.vy;
+  for (const s of solidList) {
+    if (s === body) continue;
+    if (rectsOverlap(body, s)) {
+      if (body.vy > 0) { body.y = s.y - body.h; body.onGround = true; body.standingOn = s; }
+      else if (body.vy < 0) body.y = s.y + s.h;
+      body.vy = 0;
+    }
+  }
+}
+
+// ---------- Update ----------
+const GRAVITY = 0.7;
+const MOVE = 0.9;
+const FRICTION = 0.78;
+const MAX_VX = 5.2;
+const JUMP_V = -15.7;
+
+function update(dt) {
+  if (!state.running) return;
+  state.totalTime = (performance.now() - state.startTime) / 1000;
+  document.getElementById('timer').textContent = state.totalTime.toFixed(1) + 's';
+
+  if (keys.restart) { resetLevel(); keys.restart = false; return; }
+  if (player.dead || player.win) return;
+
+  // Movers
+  for (const m of movers) {
+    m.px = m.x; m.py = m.y;
+    m.t += m.speed * dt;
+    const off = Math.sin(m.t) * m.range;
+    if (m.dir === 'h') m.x = m.ox + off;
+    else m.y = m.oy + off;
+  }
+
+  // Player input
+  if (keys.left)  { player.vx -= MOVE; player.facing = -1; }
+  if (keys.right) { player.vx += MOVE; player.facing = 1; }
+  if (!keys.left && !keys.right) player.vx *= FRICTION;
+  player.vx = Math.max(-MAX_VX, Math.min(MAX_VX, player.vx));
+  if (Math.abs(player.vx) < 0.05) player.vx = 0;
+
+  // Jump with coyote time + buffering
+  player.coyote = player.onGround ? 8 : player.coyote - 1;
+  if (keys.jump) player.jumpBuffer = 8; else player.jumpBuffer--;
+  if (player.jumpBuffer > 0 && player.coyote > 0) {
+    player.vy = JUMP_V;
+    player.coyote = 0; player.jumpBuffer = 0;
+    spawnParticles(player.x + player.w/2, player.y + player.h, 6, '#9d7bff');
+  }
+  // Variable jump height
+  if (!keys.jump && player.vy < -4) player.vy = -4;
+
+  player.vy += GRAVITY;
+  if (player.vy > 16) player.vy = 16;
+
+  const sList = activeSolids();
+  const wasOn = player.standingOn;
+  player.standingOn = null;
+  moveAndCollide(player, sList);
+
+  // Carry player on moving platform
+  if (player.standingOn && movers.includes(player.standingOn)) {
+    const m = player.standingOn;
+    player.x += (m.x - m.px);
+    player.y += (m.y - m.py);
+  }
+
+  if (Math.abs(player.vx) > 0.5 && player.onGround) player.walkAnim += dt * 0.3;
+
+  // Crate physics: push horizontally, apply gravity
+  for (const cr of crates) {
+    // gravity
+    cr.vy += GRAVITY;
+    if (cr.vy > 16) cr.vy = 16;
+    cr.vx = 0;
+    // player pushing
+    const probe = {x: player.x + player.vx, y: player.y, w: player.w, h: player.h};
+    if (player.onGround || true) {
+      // horizontal push detection
+      const pushR = {x: cr.x-3, y: cr.y+4, w: 3, h: cr.h-8};
+      const pushL = {x: cr.x+cr.w, y: cr.y+4, w: 3, h: cr.h-8};
+      if (keys.right && rectsOverlap(player, pushR)) cr.vx = 2.2;
+      if (keys.left && rectsOverlap(player, pushL)) cr.vx = -2.2;
+    }
+    const crateSolids = solids.concat(crates.filter(c=>c!==cr), movers, hasKey?[]:doors);
+    moveAndCollide(cr, crateSolids);
+  }
+  // Re-resolve player against crates after they move
+  for (const cr of crates) {
+    if (rectsOverlap(player, cr)) {
+      // simple push-out
+      const dx1 = (cr.x + cr.w) - player.x;
+      const dx2 = (player.x + player.w) - cr.x;
+      const dy1 = (cr.y + cr.h) - player.y;
+      const dy2 = (player.y + player.h) - cr.y;
+      const m = Math.min(dx1, dx2, dy1, dy2);
+      if (m === dy2) { player.y = cr.y - player.h; player.vy = 0; player.onGround = true; player.standingOn = cr; }
+      else if (m === dy1) { player.y = cr.y + cr.h; player.vy = 0; }
+      else if (m === dx1) { player.x = cr.x + cr.w; player.vx = 0; }
+      else { player.x = cr.x - player.w; player.vx = 0; }
+    }
+  }
+
+  // World bounds
+  if (player.x < 0) { player.x = 0; player.vx = 0; }
+  if (player.x + player.w > W) { player.x = W - player.w; player.vx = 0; }
+  if (player.y < 0) { player.y = 0; if (player.vy < 0) player.vy = 0; } // ceiling
+  if (player.y > H + 80) die();
+
+  // Spikes
+  for (const s of spikes) if (rectsOverlap(player, s)) { die(); break; }
+
+  // Enemies (patrol + deadly on contact)
+  for (const e of enemies) {
+    e.x += e.speed * e.dir;
+    if (e.x <= e.minX) { e.x = e.minX; e.dir = 1; }
+    if (e.x >= e.maxX) { e.x = e.maxX; e.dir = -1; }
+    e.anim += dt * 0.02;
+    if (!player.dead && rectsOverlap(player, e)) { die(); break; }
+  }
+
+  // Keys
+  for (const k of keyItems) {
+    if (!k.taken && rectsOverlap(player, k)) {
+      k.taken = true; hasKey = true;
+      spawnParticles(k.x+k.w/2, k.y+k.h/2, 14, '#ffd23f');
+    }
+    k.bob += dt * 0.005;
+  }
+
+  // Coins
+  for (const c of coins) {
+    if (!c.taken && rectsOverlap(player, c)) {
+      c.taken = true;
+      state.coins++;
+      document.getElementById('coins').textContent = state.coins;
+      spawnParticles(c.x+c.w/2, c.y+c.h/2, 8, '#ffd23f');
+      sfxCoin();
+    }
+    c.bob += dt * 0.006;
+  }
+
+  // Dollar (goal)
+  if (dollar) {
+    dollar.bob += dt * 0.005;
+    if (rectsOverlap(player, dollar)) winLevel();
+  }
+
+  // particles
+  for (const p of particles) {
+    p.x += p.vx; p.y += p.vy; p.vy += 0.25; p.life -= dt;
+  }
+  particles = particles.filter(p => p.life > 0);
+
+  if (cameraShake > 0) cameraShake -= dt;
+}
+
+function spawnParticles(x, y, n, color) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const sp = 1 + Math.random() * 3;
+    particles.push({x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 1, life: 30 + Math.random()*20, color});
+  }
+}
+
+function die() {
+  if (player.dead) return;
+  player.dead = true;
+  cameraShake = 18;
+  spawnParticles(player.x+player.w/2, player.y+player.h/2, 20, '#ff5470');
+  sfxDeath();
+  setTimeout(resetLevel, 650);
+}
+
+function resetLevel() {
+  // Dying respawns this level's coins, so roll the counter back to what was
+  // banked at the start of the level — no double-counting on retries.
+  state.coins = state.coinsBanked;
+  document.getElementById('coins').textContent = state.coins;
+  buildLevel(state.levelIndex);
+}
+
+function winLevel() {
+  if (player.win) return;
+  player.win = true;
+  state.running = false;
+  spawnParticles(dollar.x+dollar.w/2, dollar.y+dollar.h/2, 30, '#3ddc84');
+  state.cash++;                       // one dollar actually collected
+  document.getElementById('cash').textContent = '$' + state.cash;
+  markBeaten(state.levelIndex);
+  sfxWin();
+
+  setTimeout(() => {
+    if (state.levelIndex >= LEVELS.length - 1) {
+      showWin();
+    } else {
+      const sub = [
+        "One dollar down. The landlord stops glaring.",
+        "Two bucks! He can almost afford instant noodles AND rent.",
+        "Three dollars secured. The hustle is real.",
+        "Four! The eviction notice is looking nervous.",
+        "Five — halfway there. No turning back now.",
+        "Six dollars. The landlord cracks a tiny smile.",
+        "Seven! Yung Hung Jung can almost taste freedom.",
+        "Eight bucks down. The vault keys are getting heavier.",
+        "Nine! One more dollar and rent is PAID.",
+      ][state.levelIndex] || "";
+      document.getElementById('clearSub').textContent = sub;
+      document.getElementById('levelClear').classList.remove('hidden');
+    }
+  }, 600);
+}
+
+// ---------- Render ----------
+function draw() {
+  if (!solids) return;   // no level built yet (loop runs from page load)
+  ctx.save();
+  if (cameraShake > 0) {
+    ctx.translate((Math.random()-0.5)*cameraShake, (Math.random()-0.5)*cameraShake);
+  }
+
+  // background
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, '#241a42');
+  g.addColorStop(1, '#0e0a1d');
+  ctx.fillStyle = g;
+  ctx.fillRect(-20,-20,W+40,H+40);
+
+  // parallax stars
+  ctx.fillStyle = 'rgba(255,255,255,0.10)';
+  for (let i=0;i<40;i++){
+    const sx = (i*97 % W), sy = (i*53 % (H-120));
+    ctx.fillRect(sx, sy, 2, 2);
+  }
+
+  // solids
+  for (const s of solids) drawBlock(s);
+
+  // doors
+  for (const d of doors) {
+    if (hasKey) continue;
+    ctx.fillStyle = '#7a4b1e';
+    roundRect(d.x+4, d.y+2, d.w-8, d.h-2, 4); ctx.fill();
+    ctx.fillStyle = '#a9692c';
+    roundRect(d.x+8, d.y+6, d.w-16, d.h-10, 3); ctx.fill();
+    ctx.fillStyle = '#ffd23f';
+    ctx.beginPath(); ctx.arc(d.x+d.w-13, d.y+d.h/2, 3, 0, 7); ctx.fill();
+  }
+
+  // crates
+  for (const cr of crates) {
+    ctx.fillStyle = '#b07a3c';
+    roundRect(cr.x, cr.y, cr.w, cr.h, 4); ctx.fill();
+    ctx.strokeStyle = '#6e4a1f'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cr.x, cr.y); ctx.lineTo(cr.x+cr.w, cr.y+cr.h);
+    ctx.moveTo(cr.x+cr.w, cr.y); ctx.lineTo(cr.x, cr.y+cr.h);
+    ctx.stroke();
+  }
+
+  // movers
+  for (const m of movers) {
+    ctx.fillStyle = '#5ad1ff';
+    roundRect(m.x, m.y, m.w, m.h, 5); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    roundRect(m.x+4, m.y+3, m.w-8, 4, 2); ctx.fill();
+  }
+
+  // enemies (the landlord's collectors)
+  for (const e of enemies) {
+    const wob = Math.sin(e.anim) * 2;
+    ctx.fillStyle = '#c1121f';
+    roundRectAt(e.x, e.y + (wob>0?wob:0), e.w, e.h - Math.abs(wob), 6); ctx.fill();
+    // angry brow + eyes, facing travel direction
+    ctx.fillStyle = '#fff';
+    const ex = e.x + e.w/2 + e.dir*4;
+    ctx.beginPath(); ctx.arc(ex-4, e.y+9, 3, 0, 7); ctx.arc(ex+4, e.y+9, 3, 0, 7); ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath(); ctx.arc(ex-4+e.dir, e.y+9, 1.5, 0, 7); ctx.arc(ex+4+e.dir, e.y+9, 1.5, 0, 7); ctx.fill();
+    ctx.strokeStyle = '#7a0a12'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(ex-7, e.y+4); ctx.lineTo(ex-1, e.y+6);
+    ctx.moveTo(ex+7, e.y+4); ctx.lineTo(ex+1, e.y+6); ctx.stroke();
+    // little feet
+    ctx.fillStyle = '#7a0a12';
+    const fo = Math.sin(e.anim*2)*3;
+    ctx.fillRect(e.x+3, e.y+e.h-3, 6, 3+fo);
+    ctx.fillRect(e.x+e.w-9, e.y+e.h-3, 6, 3-fo);
+  }
+
+  // spikes
+  ctx.fillStyle = '#ff5470';
+  for (const s of spikes) {
+    const n = Math.floor(s.w / 8);
+    for (let i=0;i<n;i++){
+      const sx = s.x + i*8;
+      ctx.beginPath();
+      ctx.moveTo(sx, s.y+s.h);
+      ctx.lineTo(sx+4, s.y);
+      ctx.lineTo(sx+8, s.y+s.h);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  // coins
+  for (const c of coins) {
+    if (c.taken) continue;
+    const yo = Math.sin(c.bob)*3;
+    ctx.fillStyle = '#ffd23f';
+    ctx.beginPath(); ctx.arc(c.x+c.w/2, c.y+c.h/2+yo, c.w/2, 0, 7); ctx.fill();
+    ctx.fillStyle = '#b8920b';
+    ctx.font = 'bold 11px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('¢', c.x+c.w/2, c.y+c.h/2+yo+1);
+  }
+
+  // keys
+  for (const k of keyItems) {
+    if (k.taken) continue;
+    const yo = Math.sin(k.bob)*4;
+    ctx.save();
+    ctx.translate(k.x+k.w/2, k.y+k.h/2+yo);
+    ctx.fillStyle = '#ffd23f';
+    ctx.beginPath(); ctx.arc(-4, 0, 6, 0, 7); ctx.fill();
+    ctx.fillStyle = '#0e0a1d';
+    ctx.beginPath(); ctx.arc(-4, 0, 2.5, 0, 7); ctx.fill();
+    ctx.fillStyle = '#ffd23f';
+    ctx.fillRect(0, -2, 12, 4);
+    ctx.fillRect(8, -2, 3, 7);
+    ctx.fillRect(12, -2, 3, 7);
+    ctx.restore();
+  }
+
+  // dollar (goal)
+  if (dollar) {
+    const yo = Math.sin(dollar.bob)*5;
+    ctx.save();
+    ctx.translate(dollar.x+dollar.w/2, dollar.y+dollar.h/2+yo);
+    // glow
+    ctx.shadowColor = '#3ddc84'; ctx.shadowBlur = 20;
+    ctx.fillStyle = '#3ddc84';
+    roundRectAt(-dollar.w/2, -dollar.h/2, dollar.w, dollar.h, 4); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#0e3d22';
+    ctx.font = 'bold 26px Trebuchet MS'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('$', 0, 1);
+    ctx.restore();
+  }
+
+  // player
+  drawPlayer();
+
+  // particles
+  for (const p of particles) {
+    ctx.globalAlpha = Math.max(0, p.life/40);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x-2, p.y-2, 4, 4);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+}
+
+function drawBlock(s) {
+  ctx.fillStyle = '#3a2e63';
+  roundRectAt(s.x, s.y, s.w, s.h, 3); ctx.fill();
+  ctx.fillStyle = '#4d3e80';
+  ctx.fillRect(s.x+3, s.y+3, s.w-6, 5);
+  ctx.strokeStyle = '#221a3d'; ctx.lineWidth = 1;
+  ctx.strokeRect(s.x+0.5, s.y+0.5, s.w-1, s.h-1);
+}
+
+function drawPlayer() {
+  const p = player;
+  ctx.save();
+  ctx.translate(p.x + p.w/2, p.y + p.h/2);
+  ctx.scale(p.facing, 1);
+
+  if (p.dead) ctx.globalAlpha = 0.5;
+
+  const bw = p.w, bh = p.h;
+  // body
+  ctx.fillStyle = '#ff8c42';
+  roundRectAt(-bw/2, -bh/2+8, bw, bh-8, 5); ctx.fill();
+  // head
+  ctx.fillStyle = '#ffd0a8';
+  ctx.beginPath(); ctx.arc(0, -bh/2+8, 10, 0, 7); ctx.fill();
+  // cap
+  ctx.fillStyle = '#3ddc84';
+  ctx.beginPath();
+  ctx.arc(0, -bh/2+4, 11, Math.PI, 0); ctx.fill();
+  ctx.fillRect(2, -bh/2+3, 14, 4);
+  // eyes
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(4, -bh/2+8, 1.8, 0, 7); ctx.fill();
+  // legs (simple walk)
+  const swing = Math.sin(p.walkAnim) * 4 * (p.onGround?1:0);
+  ctx.fillStyle = '#2a3d66';
+  ctx.fillRect(-6, bh/2-6, 5, 6+swing);
+  ctx.fillRect(2, bh/2-6, 5, 6-swing);
+
+  ctx.restore();
+}
+
+// rounded rect that respects current translate (uses raw coords)
+function roundRectAt(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+function roundRect(x, y, w, h, r) { roundRectAt(x, y, w, h, r); }
+
+// ---------- Loop ----------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(32, now - last);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ---------- Audio (procedural chiptune + SFX, Web Audio) ----------
+let AC = null, master = null, schedTimer = null, nextNoteTime = 0, mStep = 0;
+let muted = localStorage.getItem('yhj_muted') === '1';
+const BPM = 130, stepDur = 60 / BPM / 2; // eighth notes
+// Cheerful loop: melody (16 eighths) over a I–vi–V–IV bass.
+const MEL = [523.25,659.25,783.99,659.25, 440.00,523.25,659.25,523.25,
+             392.00,493.88,587.33,493.88, 349.23,440.00,523.25,440.00];
+const BASS = [65.41,65.41,110.00,110.00, 98.00,98.00,87.31,87.31]; // one per 2 steps
+
+function initAudio() {
+  if (AC) return;
+  AC = new (window.AudioContext || window.webkitAudioContext)();
+  master = AC.createGain();
+  master.gain.value = muted ? 0 : 0.16;
+  master.connect(AC.destination);
+}
+function tone(freq, t, dur, type, gain) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(gain, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(master);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function scheduler() {
+  while (nextNoteTime < AC.currentTime + 0.12) {
+    const m = MEL[mStep % MEL.length];
+    if (m) tone(m, nextNoteTime, stepDur * 0.9, 'square', 0.09);
+    if (mStep % 2 === 0) tone(BASS[(mStep / 2) % BASS.length], nextNoteTime, stepDur * 1.7, 'triangle', 0.13);
+    nextNoteTime += stepDur; mStep++;
+  }
+}
+function startMusic() {
+  if (!AC || schedTimer) return;
+  if (AC.state === 'suspended') AC.resume();
+  nextNoteTime = AC.currentTime + 0.1;
+  schedTimer = setInterval(scheduler, 35);
+}
+// quick sound effects (no-op until audio is initialised by a user gesture)
+function blip(seq, type, gain) {
+  if (!AC || muted) return;
+  let t = AC.currentTime;
+  for (const [f, d] of seq) { if (f) tone(f, t, d, type, gain); t += d; }
+}
+function sfxCoin()  { blip([[1046.5,0.06],[1568,0.09]], 'square', 0.12); }
+function sfxWin()   { blip([[523,0.1],[659,0.1],[784,0.1],[1046,0.22]], 'square', 0.13); }
+function sfxDeath() { blip([[330,0.09],[247,0.09],[165,0.18]], 'sawtooth', 0.12); }
+
+function setMuted(v) {
+  muted = v;
+  localStorage.setItem('yhj_muted', v ? '1' : '0');
+  if (master) master.gain.value = v ? 0 : 0.16;
+  document.getElementById('muteBtn').textContent = v ? '🔇' : '🔊';
+}
+
+// ---------- Progress (level-select checkmarks) ----------
+function beatenSet() {
+  try { return new Set(JSON.parse(localStorage.getItem('yhj_beaten') || '[]')); }
+  catch (e) { return new Set(); }
+}
+function markBeaten(idx) {
+  const s = beatenSet(); s.add(idx);
+  localStorage.setItem('yhj_beaten', JSON.stringify([...s]));
+}
+
+// ---------- UI flow ----------
+const $ = id => document.getElementById(id);
+function hideOverlays() {
+  for (const id of ['mainMenu','levelSelect','levelClear','winScreen']) $(id).classList.add('hidden');
+}
+
+function startLevel(idx) {
+  state.levelIndex = idx;
+  state.coinsBanked = state.coins;   // coins carried in from cleared levels
+  buildLevel(idx);
+  $('lvl').textContent = idx + 1;
+  state.running = true;
+  state.startTime = performance.now();
+}
+// Begin a fresh run from a chosen level (resets the coin/cash counters).
+function beginRun(idx) {
+  hideOverlays();
+  state.paused = false;
+  state.coins = 0; state.cash = 0;   // dollars are only earned by reaching goals
+  $('coins').textContent = '0';
+  $('cash').textContent = '$0';
+  startLevel(idx);
+}
+
+// Open the main menu. Continue is offered only when a level is paused.
+function openMenu() {
+  state.running = false;
+  $('continueBtn').classList.toggle('hidden', !state.paused);
+  hideOverlays();
+  $('mainMenu').classList.remove('hidden');
+}
+// Hit from the HUD menu button: pause the live level so it can be resumed.
+function pauseToMenu() {
+  if (state.running) { state.paused = true; state.pauseStart = performance.now(); }
+  openMenu();
+}
+// Resume the paused level exactly where it was, keeping the timer honest.
+function continueGame() {
+  if (!state.paused) return;
+  state.paused = false;
+  if (state.pauseStart) { state.startTime += performance.now() - state.pauseStart; state.pauseStart = 0; }
+  hideOverlays();
+  state.running = true;
+}
+
+function showLevelSelect() {
+  const beaten = beatenSet();
+  const grid = $('levelGrid');
+  grid.innerHTML = '';
+  LEVELS.forEach((lv, i) => {
+    const name = lv.name.replace(/^Level \d+ — /, '');
+    const unlocked = i === 0 || beaten.has(i - 1);     // beat the previous level to unlock
+    const cell = document.createElement('button');
+    cell.className = 'level-cell' + (unlocked ? '' : ' locked');
+    if (unlocked) {
+      cell.innerHTML = `<span class="done">${beaten.has(i) ? '✓' : ''}</span>` +
+                       `<span class="num">${i + 1}</span><span class="nm">${name}</span>`;
+      cell.onclick = () => beginRun(i);
+    } else {
+      cell.innerHTML = `<span class="done"></span><span class="num">🔒</span>` +
+                       `<span class="nm">Locked</span>`;
+      cell.disabled = true;
+    }
+    grid.appendChild(cell);
+  });
+  hideOverlays();
+  $('levelSelect').classList.remove('hidden');
+}
+
+function showWin() {
+  state.paused = false;   // run is over, nothing to continue
+  $('winScreen').classList.remove('hidden');
+  $('rentFill').style.width = Math.min(100, state.cash / LEVELS.length * 100) + '%';
+  const full = state.cash >= LEVELS.length;
+  const cashTxt = state.cash + ' crisp dollar' + (state.cash === 1 ? '' : 's');
+  $('winMsg').textContent = full
+    ? `Yung Hung Jung slaps ${cashTxt} on the counter. RENT PAID IN FULL! He did it in `
+      + `${state.totalTime.toFixed(1)}s and pocketed ${state.coins} coin${state.coins === 1 ? '' : 's'} on the way. `
+      + `The landlord nods in grudging respect — Yung Hung Jung lives to hustle another month. 🏠✨`
+    : `Yung Hung Jung made it to the end with ${cashTxt} and ${state.coins} coin${state.coins === 1 ? '' : 's'}. `
+      + `A solid hustle — start from Level 1 to pay the rent in full!`;
+}
+
+// Buttons (all are user gestures, so it's safe to start audio here)
+function withAudio(fn) { return () => { initAudio(); if (!muted) startMusic(); fn(); }; }
+$('startBtn').onclick   = withAudio(() => beginRun(0));
+$('selectBtn').onclick  = withAudio(showLevelSelect);
+$('backBtn').onclick    = () => openMenu();
+$('continueBtn').onclick = () => continueGame();
+$('resetBtn').onclick   = () => {
+  if (confirm('Reset all level progress? Every level except the first will be locked again.')) {
+    localStorage.removeItem('yhj_beaten');
+    showLevelSelect();   // re-render with the locks back on
+  }
+};
+$('nextBtn').onclick     = () => { $('levelClear').classList.add('hidden'); startLevel(state.levelIndex + 1); };
+$('replayBtn').onclick   = () => { $('rentFill').style.width = '0%'; beginRun(0); };
+$('winMenuBtn').onclick  = () => { $('rentFill').style.width = '0%'; openMenu(); };
+$('menuBtn').onclick     = () => pauseToMenu();
+$('muteBtn').onclick     = () => { initAudio(); setMuted(!muted); if (!muted) startMusic(); };
+setMuted(muted); // sync icon
+
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

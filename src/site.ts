@@ -7,6 +7,9 @@ export const SITE = {
   email: "w.mitchell012@gmail.com",
   github: "https://github.com/wmitc",
   linkedin: "https://www.linkedin.com/in/william-b-mitchell/",
+  // Set to "/resume.pdf" once you drop a PDF into public/. While null, the
+  // résumé page hides the download button instead of linking to a 404.
+  resumePdf: null as string | null,
 };
 
 export const NAV = [

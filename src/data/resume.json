@@ -1,0 +1,29 @@
+{
+  "headline": "Quantitative Trading & Research",
+  "summary": "TODO: One- or two-sentence summary of who you are and what you're looking for. Replace this and everything marked TODO below with your real details.",
+  "location": "TODO: City, Country",
+  "education": [
+    {
+      "school": "TODO: University",
+      "credential": "TODO: Degree, Major",
+      "dates": "TODO: 20XX – 20XX",
+      "details": "TODO: GPA, honors, relevant coursework (e.g. stochastic calculus, probability, machine learning)."
+    }
+  ],
+  "experience": [
+    {
+      "org": "TODO: Company / Lab",
+      "role": "TODO: Role",
+      "dates": "TODO: Month 20XX – Present",
+      "bullets": [
+        "TODO: Impact-focused bullet — what you did and the result.",
+        "TODO: Quantify where possible (%, $, latency, accuracy)."
+      ]
+    }
+  ],
+  "skills": [
+    { "group": "Languages", "items": ["Python", "C++", "JavaScript/TypeScript"] },
+    { "group": "Quant / Math", "items": ["Probability", "Statistics", "Optimization"] },
+    { "group": "Tools", "items": ["NumPy/pandas", "Git", "Linux"] }
+  ]
+}

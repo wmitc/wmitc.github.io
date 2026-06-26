@@ -1,0 +1,162 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SocialLinks from "../components/SocialLinks.astro";
+import { SITE } from "../site";
+import resume from "../data/resume.json";
+---
+
+<BaseLayout title="Résumé" description="Résumé of William Mitchell.">
+  <article class="resume">
+    <header class="head">
+      <div>
+        <h1>{SITE.name}</h1>
+        <p class="headline muted">{resume.headline}</p>
+        {resume.location && <p class="loc muted">{resume.location}</p>}
+      </div>
+      {
+        SITE.resumePdf && (
+          <a class="btn btn-primary" href={SITE.resumePdf} download>
+            Download PDF
+          </a>
+        )
+      }
+    </header>
+
+    <SocialLinks />
+
+    {
+      resume.summary && (
+        <section>
+          <h2>Summary</h2>
+          <p>{resume.summary}</p>
+        </section>
+      )
+    }
+
+    <section>
+      <h2>Experience</h2>
+      {
+        resume.experience.map((e) => (
+          <div class="entry">
+            <div class="entry-head">
+              <span class="role">
+                {e.role} · {e.org}
+              </span>
+              <span class="dates muted">{e.dates}</span>
+            </div>
+            <ul>
+              {e.bullets.map((b) => (
+                <li>{b}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      {
+        resume.education.map((ed) => (
+          <div class="entry">
+            <div class="entry-head">
+              <span class="role">{ed.school}</span>
+              <span class="dates muted">{ed.dates}</span>
+            </div>
+            <p class="cred">{ed.credential}</p>
+            {ed.details && <p class="muted">{ed.details}</p>}
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>Skills</h2>
+      <dl class="skills">
+        {
+          resume.skills.map((s) => (
+            <div class="skill-row">
+              <dt>{s.group}</dt>
+              <dd>{s.items.join(" · ")}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .resume {
+    max-width: 46rem;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .head h1 {
+    margin: 0;
+  }
+  .headline {
+    margin: 0.25rem 0 0;
+    font-size: 1.05rem;
+  }
+  .loc {
+    margin: 0.15rem 0 0;
+    font-size: 0.9rem;
+  }
+  section {
+    margin-top: 2rem;
+  }
+  section h2 {
+    font-size: 1.1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .entry {
+    margin-bottom: 1.25rem;
+  }
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+  }
+  .role {
+    font-weight: 600;
+  }
+  .dates {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  .cred {
+    margin: 0.15rem 0;
+  }
+  .entry ul {
+    margin: 0.4rem 0 0;
+    padding-left: 1.1rem;
+  }
+  .entry li {
+    margin: 0.25rem 0;
+  }
+  .skills {
+    margin: 0;
+  }
+  .skill-row {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0.4rem 0;
+  }
+  .skill-row dt {
+    flex: 0 0 8rem;
+    font-weight: 600;
+  }
+  .skill-row dd {
+    margin: 0;
+    color: var(--text-muted);
+  }
+</style>

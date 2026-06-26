@@ -2,30 +2,119 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SocialLinks from "../components/SocialLinks.astro";
 import { SITE } from "../site";
+
+const sections = [
+  {
+    href: "/projects",
+    title: "Projects",
+    blurb: "Things I've built — code, write-ups, and links to source.",
+  },
+  {
+    href: "/games",
+    title: "Games",
+    blurb: "Browser games I've made. Playable right here.",
+  },
+  {
+    href: "/reading",
+    title: "Reading",
+    blurb: "Books I've read, with ratings and short notes.",
+  },
+  {
+    href: "/blog",
+    title: "Blog",
+    blurb: "Occasional notes on markets, code, and whatever else.",
+  },
+];
 ---
 
 <BaseLayout>
   <section class="hero">
-    <h1>{SITE.name}</h1>
-    <p class="lead muted">
-      Aspiring quantitative trader / researcher. This site collects my projects,
-      browser games, reading, and writing.
+    <p class="eyebrow muted">Quantitative trading &amp; research</p>
+    <h1>Hi, I'm William Mitchell.</h1>
+    <p class="lead">
+      I'm an aspiring quantitative trader / researcher who likes building things
+      — trading-adjacent tools, small games, and the occasional solver. This site
+      is where I keep my projects, games, reading list, and writing.
     </p>
-    <SocialLinks />
+    <div class="cta">
+      <SocialLinks />
+      <a class="btn btn-primary" href="/resume">View résumé</a>
+    </div>
+  </section>
+
+  <section class="sections" aria-label="Explore">
+    {
+      sections.map((s) => (
+        <a class="section-card card" href={s.href}>
+          <h2>{s.title}</h2>
+          <p class="muted">{s.blurb}</p>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      ))
+    }
   </section>
 </BaseLayout>
 
 <style>
   .hero {
-    max-width: 42rem;
-    padding-block: 1.5rem 1rem;
+    max-width: 44rem;
+    padding-block: 1.5rem 2.5rem;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.5rem;
   }
   .hero h1 {
     font-size: clamp(2rem, 5vw, 3rem);
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.75rem;
   }
   .lead {
     font-size: 1.15rem;
-    margin: 0 0 1.5rem;
+    color: var(--text);
+    margin: 0 0 1.75rem;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem;
+  }
+  .section-card {
+    position: relative;
+    color: var(--text);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .section-card:hover {
+    border-color: var(--accent);
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+  .section-card h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.2rem;
+  }
+  .section-card p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+  .section-card .arrow {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.1rem;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .section-card:hover .arrow {
+    opacity: 1;
   }
 </style>

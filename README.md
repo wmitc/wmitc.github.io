@@ -28,3 +28,26 @@ and publishes it to GitHub Pages via the official `withastro/action`.
 - `src/content/` — content collections (books, projects, posts)
 - `src/site.ts` — site-wide metadata and links
 - `public/games/` — vendored self-contained browser games
+
+## Editing content
+
+- **Projects:** edit `src/data/projects.json`.
+- **Reading list:** edit `src/data/books.json` (ratings are 0–5, half-steps allowed).
+- **Résumé:** edit `src/data/resume.json`; drop a `resume.pdf` into `public/` and set
+  `resumePdf: "/resume.pdf"` in `src/site.ts` to show the download button.
+- **Blog:** add a Markdown file under `src/content/posts/`.
+
+## Re-syncing vendored games
+
+The games under `public/games/` are copies of separate repos. To update them:
+
+```sh
+# single-file games
+cp ../yung-hung-jung/index.html public/games/jung/index.html
+cp ../alexa-game/alexa.html      public/games/alexa/index.html
+
+# escape-transylvania (built with the games subpath as base)
+( cd ../escape-transylvania && npx vite build --base=/games/escape/ )
+rm -rf public/games/escape && mkdir -p public/games/escape
+cp -r ../escape-transylvania/dist/. public/games/escape/
+```

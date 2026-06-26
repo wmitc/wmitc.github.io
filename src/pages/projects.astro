@@ -1,0 +1,51 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+
+const projects = (await getCollection("projects")).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout title="Projects" description="Projects and tools I've built.">
+  <header class="page-head">
+    <h1>Projects</h1>
+    <p class="muted">
+      A selection of things I've built — solvers, tools, and games. Source is on
+      <a href="https://github.com/wmitc" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+  </header>
+
+  <div class="grid">
+    {
+      projects.map((p) => (
+        <ProjectCard
+          name={p.data.name}
+          description={p.data.description}
+          tech={p.data.tech}
+          githubUrl={p.data.githubUrl}
+          liveUrl={p.data.liveUrl}
+        />
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: 1.75rem;
+  }
+  .page-head h1 {
+    margin: 0 0 0.35rem;
+  }
+  .page-head p {
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1rem;
+    align-items: stretch;
+  }
+</style>

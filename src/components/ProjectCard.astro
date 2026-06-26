@@ -1,0 +1,67 @@
+---
+interface Props {
+  name: string;
+  description: string;
+  tech?: string[];
+  githubUrl?: string;
+  liveUrl?: string;
+}
+const { name, description, tech = [], githubUrl, liveUrl } = Astro.props;
+---
+
+<article class="card project">
+  <h2>{name}</h2>
+  <p class="muted desc">{description}</p>
+  {
+    tech.length > 0 && (
+      <div class="tech">
+        {tech.map((t) => (
+          <span class="tag">{t}</span>
+        ))}
+      </div>
+    )
+  }
+  <div class="links">
+    {
+      liveUrl && (
+        <a class="btn btn-primary" href={liveUrl}>
+          {liveUrl.startsWith("/games/") ? "Play" : "Live"}
+        </a>
+      )
+    }
+    {
+      githubUrl && (
+        <a class="btn" href={githubUrl} target="_blank" rel="noopener">
+          Code
+        </a>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .project h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+  .desc {
+    margin: 0;
+    font-size: 0.97rem;
+    flex: 1;
+  }
+  .tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .links {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+</style>

@@ -14,7 +14,7 @@
     "description": "A browser-based point-and-click escape room set in Castle Dracula. Explore rooms, inspect and collect objects, and solve puzzles to escape before dawn. Progress is saved locally.",
     "tech": ["React", "Vite", "TypeScript", "Zustand"],
     "githubUrl": "https://github.com/wmitc/escape-transylvania",
-    "liveUrl": "/games/escape/",
+    "liveUrl": "/games/escape/index.html",
     "featured": true,
     "order": 20
   },
@@ -24,7 +24,7 @@
     "description": "A browser puzzle-platformer. Yung Hung Jung is behind on rent — hustle through 10 levels, dodge the landlord's collectors, and grab the cash at the end of each one.",
     "tech": ["JavaScript", "HTML5 Canvas"],
     "githubUrl": "https://github.com/wmitc/jung-game",
-    "liveUrl": "/games/jung/",
+    "liveUrl": "/games/jung/index.html",
     "featured": false,
     "order": 30
   },
@@ -34,7 +34,7 @@
     "description": "A 2D puzzle platformer across 10 hand-built levels, packed into a single self-contained HTML file with no build step — music and sound effects are generated procedurally with the Web Audio API.",
     "tech": ["JavaScript", "Web Audio API", "HTML5 Canvas"],
     "githubUrl": "https://github.com/wmitc/alexa-game",
-    "liveUrl": "/games/alexa/",
+    "liveUrl": "/games/alexa/index.html",
     "featured": false,
     "order": 40
   }

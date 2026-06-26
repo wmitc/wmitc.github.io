@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+interface Game {
+  title: string;
+  emoji: string;
+  blurb: string;
+  playUrl: string;
+  codeUrl: string;
+}
+
+const games: Game[] = [
+  {
+    title: "Escape Transylvania",
+    emoji: "🦇",
+    blurb:
+      "A point-and-click escape room in Castle Dracula. Inspect rooms, collect objects, and solve the Count's puzzles before dawn.",
+    playUrl: "/games/escape/index.html",
+    codeUrl: "https://github.com/wmitc/escape-transylvania",
+  },
+  {
+    title: "Yung Hung Jung: Rent's Due",
+    emoji: "💸",
+    blurb:
+      "A puzzle-platformer. Hustle through 10 levels, dodge the landlord's collectors, and grab the cash at the end of each one.",
+    playUrl: "/games/jung/index.html",
+    codeUrl: "https://github.com/wmitc/jung-game",
+  },
+  {
+    title: "Alexa's Bed Bug Battle",
+    emoji: "🛌",
+    blurb:
+      "A 2D platformer across 10 hand-built levels. Stomp bugs, ride platforms, and topple two bosses — with procedurally generated audio.",
+    playUrl: "/games/alexa/index.html",
+    codeUrl: "https://github.com/wmitc/alexa-game",
+  },
+];
+---
+
+<BaseLayout title="Games" description="Browser games I've built — playable here.">
+  <header class="page-head">
+    <h1>Games</h1>
+    <p class="muted">
+      Browser games I've built. They run right here — no install. Source is
+      linked on each card.
+    </p>
+  </header>
+
+  <div class="grid">
+    {
+      games.map((g) => (
+        <article class="card game">
+          <a class="thumb" href={g.playUrl} aria-label={`Play ${g.title}`}>
+            <span aria-hidden="true">{g.emoji}</span>
+          </a>
+          <div class="body">
+            <h2>{g.title}</h2>
+            <p class="muted">{g.blurb}</p>
+            <div class="links">
+              <a class="btn btn-primary" href={g.playUrl}>
+                Play
+              </a>
+              <a class="btn" href={g.codeUrl} target="_blank" rel="noopener">
+                Code
+              </a>
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head {
+    margin-bottom: 1.75rem;
+  }
+  .page-head h1 {
+    margin: 0 0 0.35rem;
+  }
+  .page-head p {
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: 1rem;
+  }
+  .game {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0;
+    overflow: hidden;
+  }
+  .thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
+    font-size: 3.5rem;
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+  }
+  .thumb:hover {
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg-subtle));
+  }
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 0 1.25rem 1.25rem;
+  }
+  .body h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+  .body p {
+    margin: 0;
+    font-size: 0.95rem;
+    flex: 1;
+  }
+  .links {
+    display: flex;
+    gap: 0.5rem;
+  }
+</style>

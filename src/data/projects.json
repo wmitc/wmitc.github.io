@@ -1,12 +1,91 @@
 [
   {
+    "id": "mit-thesis",
+    "name": "MIT Master's Thesis",
+    "description": "TODO: William to provide the thesis title, a 2–3 sentence summary, and a link (PDF or DSpace). Placeholder entry — fill in src/data/projects.json.",
+    "tech": ["Research"],
+    "featured": true,
+    "order": 5
+  },
+  {
+    "id": "gt-capstone",
+    "name": "Georgia Tech Capstone",
+    "description": "TODO: William to provide the capstone title, a 2–3 sentence summary, and a link. Placeholder entry — fill in src/data/projects.json.",
+    "tech": ["Research"],
+    "featured": true,
+    "order": 6
+  },
+  {
+    "id": "imc-prosperity-4",
+    "name": "IMC Prosperity 4",
+    "description": "My run at IMC Prosperity 4, IMC Trading's global algorithmic trading competition. Round-by-round strategies for market making and trading a simulated exchange, with notes on what worked and what didn't.",
+    "tech": ["Python", "Algorithmic trading", "Market making"],
+    "githubUrl": "https://github.com/wmitc/imc-prosperity-4",
+    "featured": true,
+    "order": 10
+  },
+  {
+    "id": "poker-bot",
+    "name": "Poker Bot",
+    "description": "A Texas Hold'em bot that estimates hand equity with Monte Carlo simulation and uses it to drive betting decisions.",
+    "tech": ["Python", "Monte Carlo", "Game theory"],
+    "githubUrl": "https://github.com/wmitc/poker-bot",
+    "featured": true,
+    "order": 20
+  },
+  {
+    "id": "blackjack-sim",
+    "name": "Blackjack Simulator",
+    "description": "A simulator that quantifies the edge from card counting across many trials of blackjack, measuring how the running count and strategy shift expected value.",
+    "tech": ["Python", "Simulation", "Probability"],
+    "githubUrl": "https://github.com/wmitc/blackjack-sim",
+    "featured": true,
+    "order": 30
+  },
+  {
+    "id": "perudo",
+    "name": "Perudo Bot",
+    "description": "Play the dice game Perudo against a bot that maintains Bayesian beliefs over the hidden dice and updates them each round. Can you beat it?",
+    "tech": ["Python", "Bayesian inference", "Jupyter"],
+    "githubUrl": "https://github.com/wmitc/perudo",
+    "featured": false,
+    "order": 40
+  },
+  {
+    "id": "fantasy-optimizer",
+    "name": "Fantasy Optimizer",
+    "description": "A streamer-pick optimization tool for ESPN fantasy men's basketball — picks daily add/drops to maximize roster output under league constraints.",
+    "tech": ["Python", "Optimization"],
+    "githubUrl": "https://github.com/wmitc/fantasy-optimizer",
+    "featured": false,
+    "order": 50
+  },
+  {
+    "id": "fill-in-the-missing-word",
+    "name": "Fill in the Missing Word",
+    "description": "Final project for MIT 6.863J Natural Language Processing — a model that predicts a missing word from the surrounding sentence context.",
+    "tech": ["Python", "NLP"],
+    "githubUrl": "https://github.com/wmitc/FillInTheMissingWord",
+    "featured": false,
+    "order": 60
+  },
+  {
+    "id": "padm-project",
+    "name": "Principles of Autonomy & Decision Making",
+    "description": "Final project for MIT 6.4132 Principles of Autonomy and Decision Making — integrated planning and decision-making for an autonomous agent.",
+    "tech": ["Python", "Planning", "Decision making"],
+    "githubUrl": "https://github.com/wmitc/PADM_project",
+    "featured": false,
+    "order": 70
+  },
+  {
     "id": "82-0-solver",
     "name": "82-0 Solver",
     "description": "Automated solvers for the viral basketball roster game 82-0.com. Two agents reach a perfect 82-0 season by different philosophies: one guarantees the win by controlling the game's randomness, the other wins legitimately through fast repeated attempts. Includes the reverse-engineering and tooling behind them.",
     "tech": ["JavaScript", "Reverse engineering", "Optimization"],
     "githubUrl": "https://github.com/wmitc/82-0_Solver",
-    "featured": true,
-    "order": 10
+    "featured": false,
+    "order": 80
   },
   {
     "id": "escape-transylvania",
@@ -15,8 +94,8 @@
     "tech": ["React", "Vite", "TypeScript", "Zustand"],
     "githubUrl": "https://github.com/wmitc/escape-transylvania",
     "liveUrl": "/games/escape/index.html",
-    "featured": true,
-    "order": 20
+    "featured": false,
+    "order": 90
   },
   {
     "id": "jung-game",
@@ -26,7 +105,7 @@
     "githubUrl": "https://github.com/wmitc/jung-game",
     "liveUrl": "/games/jung/index.html",
     "featured": false,
-    "order": 30
+    "order": 100
   },
   {
     "id": "alexa-game",
@@ -36,6 +115,6 @@
     "githubUrl": "https://github.com/wmitc/alexa-game",
     "liveUrl": "/games/alexa/index.html",
     "featured": false,
-    "order": 40
+    "order": 110
   }
 ]

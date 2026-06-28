@@ -27,6 +27,7 @@ const projects = (await getCollection("projects")).sort(
           githubUrl={p.data.githubUrl}
           liveUrl={p.data.liveUrl}
           linkLabel={p.data.linkLabel}
+          icon={p.data.icon}
         />
       ))
     }

@@ -13,6 +13,8 @@ const projects = defineCollection({
     liveUrl: z.string().optional(),
     // Override the live-link button text (defaults to Play/Live).
     linkLabel: z.string().optional(),
+    // Icon key for the card banner (see ProjectIcon.astro).
+    icon: z.string().optional(),
     featured: z.boolean().default(false),
     // Lower numbers sort first.
     order: z.number().default(100),

@@ -1,0 +1,94 @@
+---
+// Small inline-SVG "banner" shown on the top half of each project card.
+// `name` selects both the icon and its gradient hue. No image files needed.
+interface Props {
+  name?: string;
+}
+const { name = "" } = Astro.props;
+
+// Inner markup for a 24x24, stroke-based icon (uses currentColor).
+const ICONS: Record<string, string> = {
+  // Anomaly detection — line chart with a highlighted spike (thesis)
+  signal: `<path d="M2 14l4-2 3 1 3-7 3 7 3-2 4 1"/><circle cx="11" cy="6" r="2"/>`,
+  // Shield + keyhole (security capstone)
+  security: `<path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><circle cx="12" cy="10.5" r="1.5"/><path d="M12 12v3"/>`,
+  // Candlesticks (algorithmic trading)
+  trading: `<path d="M8 3v18"/><rect x="5.5" y="7" width="5" height="9" rx="1"/><path d="M16 5v14"/><rect x="13.5" y="9" width="5" height="7" rx="1"/>`,
+  // Axes + rising line with arrow (reinforcement-learning trading)
+  rlchart: `<path d="M4 3v17h17"/><path d="M7 16l4-4 3 2 5-6"/><path d="M16 5h3v3"/>`,
+  // Two overlapping playing cards (poker)
+  cards: `<rect x="3.5" y="6" width="10" height="14" rx="1.5" transform="rotate(-9 8.5 13)"/><rect x="11" y="5" width="10" height="14" rx="1.5" transform="rotate(9 16 12)"/><path d="M16 9.5c-1.2 1.4-2.2 2-2.2 3a1.1 1.1 0 0 0 2.2.2 1.1 1.1 0 0 0 2.2-.2c0-1-1-1.6-2.2-3z"/>`,
+  // Casino chip (blackjack)
+  chip: `<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/>`,
+  // Two dice (perudo)
+  dice: `<rect x="3" y="9" width="10" height="10" rx="2"/><rect x="11.5" y="3.5" width="9" height="9" rx="2"/><circle cx="6" cy="12" r=".9"/><circle cx="10" cy="16" r=".9"/><circle cx="14" cy="6" r=".8"/><circle cx="18" cy="10" r=".8"/>`,
+  // Basketball (fantasy optimizer)
+  basketball: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/><path d="M5.6 5.6c3.5 2.8 3.5 10.4 0 12.8M18.4 5.6c-3.5 2.8-3.5 10.4 0 12.8"/>`,
+  // Chat bubble with a blank line (NLP fill-in-the-word)
+  text: `<path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H10l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M7 10h3"/><path d="M12.5 10h4.5" stroke-dasharray="1.4 1.6"/>`,
+  // Robot (autonomy & decision making)
+  robot: `<rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 4v4M3 13h2M19 13h2"/><circle cx="12" cy="3.5" r="1"/><circle cx="9.5" cy="13" r="1.2"/><circle cx="14.5" cy="13" r="1.2"/><path d="M10 16.5h4"/>`,
+  // Trophy (82-0 solver)
+  trophy: `<path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 5H5v1a3 3 0 0 0 3 3M16 5h3v1a3 3 0 0 1-3 3"/><path d="M12 12v3M9 20h6l-1-5h-4z"/>`,
+  // Castle (escape room)
+  castle: `<path d="M4 21v-9h2v-2h2v2h2v-3h4v3h2v-2h2v2h2v9z"/><path d="M11 21v-4a1 1 0 0 1 2 0v4"/>`,
+  // Stacked coins (rent-themed platformer)
+  coins: `<ellipse cx="12" cy="7" rx="7" ry="3"/><path d="M5 7v4.5c0 1.6 3.1 2.8 7 2.8s7-1.2 7-2.8V7"/><path d="M5 11.5V16c0 1.6 3.1 2.8 7 2.8s7-1.2 7-2.8v-4.5"/>`,
+  // Bug (bed-bug platformer)
+  bug: `<ellipse cx="12" cy="13" rx="4.5" ry="6"/><path d="M12 7v12"/><circle cx="12" cy="6" r="2"/><path d="M11 4.5L9.5 3M13 4.5L14.5 3"/><path d="M7.5 10L4 8M7.5 13H4M7.5 16l-3.5 2M16.5 10L20 8M16.5 13H20M16.5 16l3.5 2"/>`,
+};
+
+// Gradient hue (HSL) per icon.
+const HUES: Record<string, number> = {
+  signal: 172,
+  security: 350,
+  trading: 150,
+  rlchart: 202,
+  cards: 244,
+  chip: 276,
+  dice: 296,
+  basketball: 24,
+  text: 216,
+  robot: 188,
+  trophy: 42,
+  castle: 258,
+  coins: 138,
+  bug: 322,
+};
+
+const inner = ICONS[name] ?? ICONS.trading;
+const hue = HUES[name] ?? 210;
+---
+
+<div
+  class="banner"
+  style={`--g1:hsl(${hue} 70% 56%); --g2:hsl(${hue + 24} 68% 45%)`}
+  aria-hidden="true"
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    set:html={inner}
+  />
+</div>
+
+<style>
+  .banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 92px;
+    background: linear-gradient(135deg, var(--g1), var(--g2));
+    color: #fff;
+  }
+  .banner svg {
+    width: 44px;
+    height: 44px;
+    opacity: 0.95;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+  }
+</style>

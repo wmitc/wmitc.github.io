@@ -1,4 +1,6 @@
 ---
+import ProjectIcon from "./ProjectIcon.astro";
+
 interface Props {
   name: string;
   description: string;
@@ -6,44 +8,48 @@ interface Props {
   githubUrl?: string;
   liveUrl?: string;
   linkLabel?: string;
+  icon?: string;
 }
-const { name, description, tech = [], githubUrl, liveUrl, linkLabel } =
+const { name, description, tech = [], githubUrl, liveUrl, linkLabel, icon } =
   Astro.props;
 const isExternal = !!liveUrl && /^https?:\/\//.test(liveUrl);
 ---
 
 <article class="card project">
-  <h2>{name}</h2>
-  <p class="muted desc">{description}</p>
-  {
-    tech.length > 0 && (
-      <div class="tech">
-        {tech.map((t) => (
-          <span class="tag">{t}</span>
-        ))}
-      </div>
-    )
-  }
-  <div class="links">
+  <ProjectIcon name={icon} />
+  <div class="body">
+    <h2>{name}</h2>
+    <p class="muted desc">{description}</p>
     {
-      liveUrl && (
-        <a
-          class="btn btn-primary"
-          href={liveUrl}
-          target={isExternal ? "_blank" : undefined}
-          rel={isExternal ? "noopener" : undefined}
-        >
-          {linkLabel ?? (liveUrl.startsWith("/games/") ? "Play" : "Live")}
-        </a>
+      tech.length > 0 && (
+        <div class="tech">
+          {tech.map((t) => (
+            <span class="tag">{t}</span>
+          ))}
+        </div>
       )
     }
-    {
-      githubUrl && (
-        <a class="btn" href={githubUrl} target="_blank" rel="noopener">
-          Code
-        </a>
-      )
-    }
+    <div class="links">
+      {
+        liveUrl && (
+          <a
+            class="btn btn-primary"
+            href={liveUrl}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noopener" : undefined}
+          >
+            {linkLabel ?? (liveUrl.startsWith("/games/") ? "Play" : "Live")}
+          </a>
+        )
+      }
+      {
+        githubUrl && (
+          <a class="btn" href={githubUrl} target="_blank" rel="noopener">
+            Code
+          </a>
+        )
+      }
+    </div>
   </div>
 </article>
 
@@ -51,15 +57,24 @@ const isExternal = !!liveUrl && /^https?:\/\//.test(liveUrl);
   .project {
     display: flex;
     flex-direction: column;
-    gap: 0.65rem;
+    padding: 0;
+    overflow: hidden;
   }
-  .project h2 {
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 1.25rem;
+    flex: 1;
+  }
+  .body h2 {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1.2rem;
+    line-height: 1.25;
   }
   .desc {
     margin: 0;
-    font-size: 0.97rem;
+    font-size: 0.95rem;
     flex: 1;
   }
   .tech {
@@ -71,5 +86,8 @@ const isExternal = !!liveUrl && /^https?:\/\//.test(liveUrl);
     display: flex;
     gap: 0.5rem;
     margin-top: 0.25rem;
+  }
+  .links:empty {
+    display: none;
   }
 </style>

@@ -1,17 +1,21 @@
 [
   {
     "id": "mit-thesis",
-    "name": "MIT Master's Thesis",
-    "description": "TODO: William to provide the thesis title, a 2–3 sentence summary, and a link (PDF or DSpace). Placeholder entry — fill in src/data/projects.json.",
-    "tech": ["Research"],
+    "name": "Pattern & Anomaly Detection in Influence Campaigns (MIT MEng Thesis)",
+    "description": "My MIT MEng thesis (EECS), developed with MIT Lincoln Laboratory's Global Influence Model. I applied statistical and machine-learning methods — moving averages, Singular Spectrum Analysis, an autoencoder, and an LSTM — to ~30,000 news articles to surface patterns and anomalies in influence campaigns, producing visualizations to help analysts model events as they unfold.",
+    "tech": ["Python", "Machine learning", "LSTM", "Time-series", "Anomaly detection"],
+    "liveUrl": "https://dspace.mit.edu/entities/publication/c0d52da5-2eb2-4212-88a4-8331ae4c2aaa",
+    "linkLabel": "Read on DSpace",
     "featured": true,
     "order": 5
   },
   {
     "id": "gt-capstone",
-    "name": "Georgia Tech Capstone",
-    "description": "TODO: William to provide the capstone title, a 2–3 sentence summary, and a link. Placeholder entry — fill in src/data/projects.json.",
-    "tech": ["Research"],
+    "name": "LLM-Assisted Vulnerability Research on an IP Camera (Georgia Tech Capstone)",
+    "description": "My Georgia Tech MS Cybersecurity capstone. I benchmarked leading LLMs (ChatGPT, Claude, Gemini) against traditional static-analysis tools (SonarQube, Snyk, Semgrep) at finding vulnerabilities in an AVTECH IP camera's web code, then probed each model to generate proof-of-concept payloads. The LLMs surfaced notably more distinct bugs — including higher-severity ones — at a comparable false-positive rate, but suffered from inconsistency and missing context, pointing to their value as an aid to human researchers rather than a replacement.",
+    "tech": ["LLMs", "Vulnerability research", "Static analysis", "Cybersecurity"],
+    "liveUrl": "/gt-capstone.pdf",
+    "linkLabel": "Read PDF",
     "featured": true,
     "order": 6
   },
@@ -23,6 +27,14 @@
     "githubUrl": "https://github.com/wmitc/imc-prosperity-4",
     "featured": true,
     "order": 10
+  },
+  {
+    "id": "ml4t-strategy-eval",
+    "name": "Strategy Evaluation: Manual Rules vs. Q-Learning (ML4T)",
+    "description": "A final project for Georgia Tech's Machine Learning for Trading (CS 7646). I built and compared two trading systems on JPM — a hand-designed rule set over Bollinger %B, RSI, and MACD, and a Q-learning agent that discovers a policy over discretized indicator states. The writeup analyzes how the RL agent dominates in-sample (+299%) yet fails to generalize out-of-sample, illustrating the bias–variance tradeoff, and studies how market-impact costs reshape the learned policy. The full report isn't posted here out of respect for Georgia Tech's academic-integrity policy on reused coursework — happy to share it on request.",
+    "tech": ["Python", "Reinforcement learning", "Q-learning", "Technical indicators"],
+    "featured": true,
+    "order": 15
   },
   {
     "id": "poker-bot",

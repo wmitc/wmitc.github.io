@@ -5,8 +5,11 @@ interface Props {
   tech?: string[];
   githubUrl?: string;
   liveUrl?: string;
+  linkLabel?: string;
 }
-const { name, description, tech = [], githubUrl, liveUrl } = Astro.props;
+const { name, description, tech = [], githubUrl, liveUrl, linkLabel } =
+  Astro.props;
+const isExternal = !!liveUrl && /^https?:\/\//.test(liveUrl);
 ---
 
 <article class="card project">
@@ -24,8 +27,13 @@ const { name, description, tech = [], githubUrl, liveUrl } = Astro.props;
   <div class="links">
     {
       liveUrl && (
-        <a class="btn btn-primary" href={liveUrl}>
-          {liveUrl.startsWith("/games/") ? "Play" : "Live"}
+        <a
+          class="btn btn-primary"
+          href={liveUrl}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noopener" : undefined}
+        >
+          {linkLabel ?? (liveUrl.startsWith("/games/") ? "Play" : "Live")}
         </a>
       )
     }

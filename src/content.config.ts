@@ -9,8 +9,10 @@ const projects = defineCollection({
     description: z.string(),
     tech: z.array(z.string()).default([]),
     githubUrl: z.string().url().optional(),
-    // Relative path (e.g. /games/foo/) or absolute URL.
+    // Relative path (e.g. /games/foo/), absolute URL, or a PDF in public/.
     liveUrl: z.string().optional(),
+    // Override the live-link button text (defaults to Play/Live).
+    linkLabel: z.string().optional(),
     featured: z.boolean().default(false),
     // Lower numbers sort first.
     order: z.number().default(100),

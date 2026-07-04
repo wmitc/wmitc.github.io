@@ -3,10 +3,29 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import StarRating from "../components/StarRating.astro";
 
-// Sort by rating (high to low), then title.
-const books = (await getCollection("books")).sort((a, b) => {
-  if (b.data.rating !== a.data.rating) return b.data.rating - a.data.rating;
-  return a.data.title.localeCompare(b.data.title);
+const all = await getCollection("books");
+
+// Group books by the year they were read. Undated books get their own bucket.
+const groups = new Map<number | "Undated", typeof all>();
+for (const b of all) {
+  const key = b.data.yearRead ?? "Undated";
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key)!.push(b);
+}
+
+// Within a year, sort by rating (high to low), then title.
+for (const books of groups.values()) {
+  books.sort((a, b) => {
+    if (b.data.rating !== a.data.rating) return b.data.rating - a.data.rating;
+    return a.data.title.localeCompare(b.data.title);
+  });
+}
+
+// Show most recent year first; keep "Undated" at the bottom.
+const orderedGroups = [...groups.entries()].sort((a, b) => {
+  if (a[0] === "Undated") return 1;
+  if (b[0] === "Undated") return -1;
+  return (b[0] as number) - (a[0] as number);
 });
 ---
 
@@ -14,38 +33,48 @@ const books = (await getCollection("books")).sort((a, b) => {
   <header class="page-head">
     <h1>Reading</h1>
     <p class="muted">
-      Books I've read, with a star rating and a short note. ★ = 5-star scale,
-      half-stars allowed.
+      Books I've read, grouped by year with a star rating and a short note. ★ =
+      5-star scale, half-stars allowed.
     </p>
   </header>
 
-  <ul class="books">
-    {
-      books.map((b) => (
-        <li class="book card">
-          <div class="top">
-            <div>
-              <h2>
-                {b.data.title}
-                {b.data.favorite && (
-                  <span class="fav" title="Favorite" aria-label="Favorite">
-                    ♥
-                  </span>
-                )}
-              </h2>
-              <p class="byline muted">
-                {b.data.author}
-                {b.data.yearRead && <span> · read {b.data.yearRead}</span>}
-                {b.data.genre && <span> · {b.data.genre}</span>}
-              </p>
-            </div>
-            <StarRating rating={b.data.rating} />
-          </div>
-          {b.data.notes && <p class="notes muted">{b.data.notes}</p>}
-        </li>
-      ))
-    }
-  </ul>
+  {
+    orderedGroups.map(([year, books]) => (
+      <section class="year">
+        <h2 class="year-banner">{year}</h2>
+        <ul class="books">
+          {books.map((b) => (
+            <li class="book card">
+              <div class="top">
+                <div>
+                  <h3>
+                    {b.data.title}
+                    {b.data.favorite && (
+                      <span class="fav" title="Favorite" aria-label="Favorite">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-1.6 10H4.6L3 8zM4.3 20h15.4v1.4H4.3z" />
+                        </svg>
+                      </span>
+                    )}
+                  </h3>
+                  <p class="byline muted">
+                    {b.data.author}
+                    {b.data.genre && <span> · {b.data.genre}</span>}
+                  </p>
+                </div>
+                <StarRating rating={b.data.rating} />
+              </div>
+              {b.data.notes && <p class="notes muted">{b.data.notes}</p>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
 </BaseLayout>
 
 <style>
@@ -57,6 +86,17 @@ const books = (await getCollection("books")).sort((a, b) => {
   }
   .page-head p {
     margin: 0;
+  }
+  .year {
+    margin-bottom: 2rem;
+  }
+  .year-banner {
+    margin: 0 0 0.85rem;
+    padding-bottom: 0.4rem;
+    font-size: 1.35rem;
+    letter-spacing: 0.02em;
+    border-bottom: 2px solid var(--border);
+    color: var(--text);
   }
   .books {
     list-style: none;
@@ -72,14 +112,20 @@ const books = (await getCollection("books")).sort((a, b) => {
     align-items: flex-start;
     gap: 1rem;
   }
-  .book h2 {
+  .book h3 {
     margin: 0;
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
   .fav {
-    color: #e25563;
-    font-size: 0.9rem;
-    margin-left: 0.35rem;
+    display: inline-flex;
+    color: #e0a324;
+  }
+  .fav svg {
+    width: 1rem;
+    height: 1rem;
   }
   .byline {
     margin: 0.2rem 0 0;

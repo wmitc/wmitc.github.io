@@ -1,29 +1,92 @@
 {
-  "headline": "Quantitative Trading & Research",
-  "summary": "TODO: One- or two-sentence summary of who you are and what you're looking for. Replace this and everything marked TODO below with your real details.",
-  "location": "TODO: City, Country",
+  "summary": "Computer scientist (MIT B.S./M.Eng.) and U.S. Army software development lead with a background in quantitative signal extraction, time-series analysis, and anomaly detection on large, noisy datasets. Pursuing quantitative trading and research roles.",
+  "location": "Severn, MD",
   "education": [
     {
-      "school": "TODO: University",
-      "credential": "TODO: Degree, Major",
-      "dates": "TODO: 20XX – 20XX",
-      "details": "TODO: GPA, honors, relevant coursework (e.g. stochastic calculus, probability, machine learning)."
+      "school": "Massachusetts Institute of Technology",
+      "credential": "M.Eng. '23 & B.S. '19, Computer Science and Engineering",
+      "dates": "2015 — 2019, 2022 — 2023",
+      "details": "Minor: Mathematics · M.Eng. GPA 4.5/5.0 · B.S. GPA 4.3/5.0. Coursework: Statistical Data Analysis, Probability & Random Variables, Machine Learning, Natural Language Processing, Design & Analysis of Algorithms, Linear Algebra."
+    },  
+    {
+      "school": "Georgia Institute of Technology",
+      "credential": "M.S., Cybersecurity",
+      "dates": "Expected Dec 2026",
+      "details": "GPA 4.0/4.0 · Coursework: Machine Learning for Trading."
     }
   ],
   "experience": [
     {
-      "org": "TODO: Company / Lab",
-      "role": "TODO: Role",
-      "dates": "TODO: Month 20XX – Present",
+      "org": "NSA & U.S. Cyber Command (U.S. Army)",
+      "role": "Software Development Crew Lead",
+      "dates": "Mar 2024 — Present",
       "bullets": [
-        "TODO: Impact-focused bullet — what you did and the result.",
-        "TODO: Quantify where possible (%, $, latency, accuracy)."
+        "Led cross-functional teams in Applied AI and Unix software development conducting low-level vulnerability research and engineering proof-of-concept exploits for sophisticated networking devices and protocols.",
+        "Owned the full development lifecycle for mission-critical technical capabilities, including real-time state verification and validation in live execution environments."
+      ]
+    },
+    {
+      "org": "MIT Lincoln Laboratory",
+      "role": "Artificial Intelligence Research Fellow",
+      "dates": "Aug 2022 — Jul 2024",
+      "bullets": [
+        "Developed a multi-stage quantitative pipeline to ingest and analyze ~30,000 unstructured news articles, transforming qualitative events into structured time-series signals.",
+        "Demonstrated that frequency-based and decomposition methods (Singular Spectrum Analysis) captured structural shifts in news activity, while sentiment-based signals were primarily reactive."
+      ]
+    },
+    {
+      "org": "10th Special Forces Group (Airborne)",
+      "role": "Cyber Capability Developer",
+      "dates": "Jul 2019 — Jul 2022",
+      "bullets": [
+        "Built and led a new technical program for personnel deployed in high-stakes environments."
+      ]
+    },
+    {
+      "org": "Lockheed Martin",
+      "role": "Software Engineering Intern",
+      "dates": "May — Aug 2018",
+      "bullets": [
+        "Refactored core components of a Simulink/MATLAB model for the Multi-Object Kill Vehicle (MOKV) program to optimize simulation state-handling and performance testing.",
+        "Modeled environmental sensor inputs to simulate real-world physical constraints and improve the predictive accuracy of trajectory interceptor models."
+      ]
+    },
+    {
+      "org": "Massachusetts Institute of Technology",
+      "role": "Teaching Assistant",
+      "dates": "Jan — May 2018",
+      "bullets": [
+        "Taught core algorithmic concepts and statistical methods to 100+ students in MIT's Intro to CS & Programming in Python and Intro to Data Science courses."
+      ]
+    },
+    {
+      "org": "Draper Laboratory",
+      "role": "Data Science Intern",
+      "dates": "May — Aug 2016",
+      "bullets": [
+        "Engineered predictive missile-trajectory models and real-time GUI visualization tools in MATLAB."
       ]
     }
   ],
+  "awards": [
+    "Top 7.1% — IMC Prosperity 4 (global algorithmic trading competition)",
+    "AMC 10 State Winner",
+    "Trig-Star National Winner",
+    "2nd Place — Junior Science and Humanities Symposium (JSHS) Nationals",
+    "2x Academic Decathlon Individual State Champion",
+    "ACT — 33",
+    "SAT MATH II — 800",
+    "12th-ranked Capture-The-Flag (CTF) team in the DoD"
+  ],
   "skills": [
-    { "group": "Languages", "items": ["Python", "C++", "JavaScript/TypeScript"] },
-    { "group": "Quant / Math", "items": ["Probability", "Statistics", "Optimization"] },
-    { "group": "Tools", "items": ["NumPy/pandas", "Git", "Linux"] }
-  ]
+    {
+      "group": "Technical",
+      "items": ["Python (pandas, NumPy, scikit-learn, spaCy, NLTK)", "C++", "Linux"]
+    },
+    {
+      "group": "Quantitative",
+      "items": ["Time-Series Analysis", "Anomaly Detection", "Stochastic Modeling", "Singular Spectrum Analysis"]
+    }
+  ],
+  "interests": ["Soccer (DIII Varsity Athlete)", "CTFs — Captain of the 12th-ranked CTF team in the DoD"]
 }

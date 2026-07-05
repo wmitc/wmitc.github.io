@@ -75,7 +75,8 @@
     "2nd Place — Junior Science and Humanities Symposium (JSHS) Nationals",
     "2x Academic Decathlon Individual State Champion",
     "ACT — 33",
-    "SAT MATH II — 800"
+    "SAT MATH II — 800",
+    "12th-ranked Capture-The-Flag (CTF) team in the DoD"
   ],
   "skills": [
     {
@@ -87,5 +88,5 @@
       "items": ["Time-Series Analysis", "Anomaly Detection", "Stochastic Modeling", "Singular Spectrum Analysis"]
     }
   ],
-  "interests": "Soccer (DIII Varsity Athlete) · Capture the Flag (CTF) — Captain of the 12th-ranked team in the DoD"
+  "interests": ["Soccer (DIII Varsity Athlete)", "CTFs — Captain of the 12th-ranked CTF team in the DoD"]
 }

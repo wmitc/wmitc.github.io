@@ -10,7 +10,7 @@ import resume from "../data/resume.json";
     <header class="head">
       <div>
         <h1>{SITE.name}</h1>
-        <p class="headline muted">{resume.headline}</p>
+        {resume.headline && <p class="headline muted">{resume.headline}</p>}
         {resume.location && <p class="loc muted">{resume.location}</p>}
       </div>
       {
@@ -95,8 +95,20 @@ import resume from "../data/resume.json";
           ))
         }
       </dl>
-      {resume.interests && <p class="interests muted">{resume.interests}</p>}
     </section>
+
+    {
+      resume.interests && resume.interests.length > 0 && (
+        <section>
+          <h2>Interests</h2>
+          <ul class="interests">
+            {resume.interests.map((i) => (
+              <li>{i}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
   </article>
 </BaseLayout>
 
@@ -168,8 +180,11 @@ import resume from "../data/resume.json";
     margin: 0;
   }
   .interests {
-    margin: 1rem 0 0;
-    font-size: 0.95rem;
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  .interests li {
+    margin: 0.3rem 0;
   }
   .skill-row {
     display: flex;

@@ -19,6 +19,188 @@
     "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
     "favorite": false
   },
+    {
+    "id": "digital-fortress",
+    "title": "Digital Fortress",
+    "author": "Dan Brown",
+    "rating": 3.0,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
+    "favorite": false
+  },
+  {
+    "id": "flash-boys",
+    "title": "Flash Boys",
+    "author": "Michael Lewis",
+    "rating": 4.0,
+    "yearRead": 2026,
+    "genre": "Finance",
+    "notes": "Fun read. Provides interesting insights into the world of High Frequency Trading",
+    "favorite": false
+  },
+  {
+    "id": "origin",
+    "title": "Origin",
+    "author": "Dan Brown",
+    "rating": 3.5,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "Interesting read. The main thing I didn't like is that a cliff-hanger spans almost the whole book. I had to spoil it for myself after enough teasing of the big reveal.",
+    "favorite": false
+  },
+  {
+    "id": "inferno",
+    "title": "Inferno",
+    "author": "Dan Brown",
+    "rating": 4.0,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "Pretty good one.",
+    "favorite": false
+  },
+  {
+    "id": "da-vinci-code",
+    "title": "The Da Vinci Code",
+    "author": "Dan Brown",
+    "rating": 4.5,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "Interesting read. Provocative from a religious standpoint.",
+    "favorite": false
+  },
+  {
+    "id": "angels-and-demons",
+    "title": "Inferno",
+    "author": "Dan Brown",
+    "rating": 5.0,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "The first Robert Langdon book, and in my opinion, the best one.",
+    "favorite": true
+  },
+  {
+    "id": "art-of-war",
+    "title": "The Art of War",
+    "author": "Sun Tzu",
+    "rating": 3.0,
+    "yearRead": 2026,
+    "genre": "Military Strategy",
+    "notes": "I had been looking forward to this one but ultimately found it underwhelming. It it just a collection of insights about armed conflict.",
+    "favorite": false
+  },
+  {
+    "id": "ghost-wars",
+    "title": "Ghost Wars",
+    "author": "Steve Coll",
+    "rating": 4.0,
+    "yearRead": 2025,
+    "genre": "Non-fiction",
+    "notes": "Interesting content, but tough read. It details CIA activities in the Middle East that preceded and motivated the 9/11 attack.",
+    "favorite": false
+  },
+  {
+    "id": "screwtape-letters",
+    "title": "The Screwtape Letters",
+    "author": "C.S. Lewis",
+    "rating": 3.5,
+    "yearRead": 2025,
+    "genre": "Epistolary Novel",
+    "notes": "A creative idea: a senior demon writing letters to instruct his nephew on how to lead a human into temptation. It was recommended to me, but I found it just okay.",
+    "favorite": false
+  },
+  {
+    "id": "outliers",
+    "title": "Outliers",
+    "author": "Malcolm Gladwell",
+    "rating": 4.0,
+    "yearRead": 2024,
+    "genre": "Non-fiction",
+    "notes": "Intriguing read. Sensible explanation for the why some individuals among us are outliers.",
+    "favorite": false
+  },
+  {
+    "id": "running-man",
+    "title": "The Running Man",
+    "author": "Stephen King",
+    "rating": 3.5,
+    "yearRead": 2024,
+    "genre": "Thriller",
+    "notes": "Sort of a fun story, but not a favorite. Book was about the same caliber as the movie that was eventually made, 6.4/10 on IMDB.",
+    "favorite": false
+  },
+  {
+    "id": "never-split-the-difference",
+    "title": "Never Split the Difference",
+    "author": "Chris Voss",
+    "rating": 4.0,
+    "yearRead": 2024,
+    "genre": "Self-help",
+    "notes": "Interesting read by a former FBI hostage negotiator.",
+    "favorite": false
+  },
+  {
+    "id": "holly",
+    "title": "Holly",
+    "author": "Stephen King",
+    "rating": 3.5,
+    "yearRead": 2024,
+    "genre": "Mystery",
+    "notes": "I had high hopes for this one when I heard it was in development. Ultimately I was underwhelmed",
+    "favorite": false
+  },
+  {
+    "id": "1922",
+    "title": "1922",
+    "author": "Stephen King",
+    "rating": 3.0,
+    "yearRead": 2024,
+    "genre": "Psychological horror",
+    "notes": "Not memorable",
+    "favorite": false
+  },
+  {
+    "id": "the-long-walk",
+    "title": "The Long Walk",
+    "author": "Stephen King",
+    "rating": 4.5,
+    "yearRead": 2024,
+    "genre": "Dystopian thriller",
+    "notes": "Pretty entertaining read. The movie wasn't bad either, better than its 6.7/10 IMDB rating. Oddly, the movie significantly altered the ending, perhaps to make it more cinematic.",
+    "favorite": true
+  },
+  {
+    "id": "salems-lot",
+    "title": "Salem's Lot",
+    "author": "Stephen King",
+    "rating": 3.5,
+    "yearRead": 2024,
+    "genre": "Horror",
+    "notes": "I didn't care for it.",
+    "favorite": false
+  }
+  {
+    "id": "dolores-claiborne",
+    "title": "Dolores Claiborne",
+    "author": "Stephen King",
+    "rating": 4.5,
+    "yearRead": 2024,
+    "genre": "Psychological thriller",
+    "notes": "Entertaining and a unique style. The story is told as a continuous, breathless, unedited, first-person monologue.",
+    "favorite": true
+  },
+    "favorite": true
+  },
+  {
+    "id": "digital-fortress",
+    "title": "Digital Fortress",
+    "author": "Dan Brown",
+    "rating": 3.0,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
+    "favorite": false
+  },
   {
     "id": "flash-boys",
     "title": "Flash Boys",

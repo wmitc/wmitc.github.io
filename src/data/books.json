@@ -1,29 +1,19 @@
 [
-    {
+  {
     "id": "secret-of-secrets",
     "title": "The Secret of Secrets",
     "author": "Dan Brown",
     "rating": 4.5,
     "yearRead": 2026,
     "genre": "Thriller",
-    "notes": "Pretty good.",
+    "notes": "Pretty good. The newest installment in the Robert Langdon series.",
     "favorite": true
   },
   {
     "id": "digital-fortress",
     "title": "Digital Fortress",
     "author": "Dan Brown",
-    "rating": 3.0,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
-    "favorite": false
-  },
-    {
-    "id": "digital-fortress",
-    "title": "Digital Fortress",
-    "author": "Dan Brown",
-    "rating": 3.0,
+    "rating": 2.5,
     "yearRead": 2026,
     "genre": "Thriller",
     "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
@@ -56,14 +46,14 @@
     "rating": 4.0,
     "yearRead": 2026,
     "genre": "Thriller",
-    "notes": "Pretty good one.",
+    "notes": "Pretty good one. Another Robert Langdon book.",
     "favorite": false
   },
   {
-    "id": "da-vinci-code",
+    "id": "the-da-vinci-code",
     "title": "The Da Vinci Code",
     "author": "Dan Brown",
-    "rating": 4.5,
+    "rating": 4.0,
     "yearRead": 2026,
     "genre": "Thriller",
     "notes": "Interesting read. Provocative from a religious standpoint.",
@@ -71,10 +61,10 @@
   },
   {
     "id": "angels-and-demons",
-    "title": "Inferno",
+    "title": "Angels & Demons",
     "author": "Dan Brown",
     "rating": 5.0,
-    "yearRead": 2026,
+    "yearRead": 2025,
     "genre": "Thriller",
     "notes": "The first Robert Langdon book, and in my opinion, the best one.",
     "favorite": true
@@ -84,7 +74,7 @@
     "title": "The Art of War",
     "author": "Sun Tzu",
     "rating": 3.0,
-    "yearRead": 2026,
+    "yearRead": 2025,
     "genre": "Military Strategy",
     "notes": "I had been looking forward to this one but ultimately found it underwhelming. It it just a collection of insights about armed conflict.",
     "favorite": false
@@ -98,6 +88,16 @@
     "genre": "Non-fiction",
     "notes": "Interesting content, but tough read. It details CIA activities in the Middle East that preceded and motivated the 9/11 attack.",
     "favorite": false
+  },
+  {
+    "id": "the-source",
+    "title": "The Source",
+    "author": "James Michener",
+    "rating": 4.5,
+    "yearRead": 2025,
+    "genre": "Historical fiction",
+    "notes": "A mammoth book, but an incredible story.",
+    "favorite": true
   },
   {
     "id": "screwtape-letters",
@@ -178,7 +178,7 @@
     "genre": "Horror",
     "notes": "I didn't care for it.",
     "favorite": false
-  }
+  },
   {
     "id": "dolores-claiborne",
     "title": "Dolores Claiborne",
@@ -189,96 +189,14 @@
     "notes": "Entertaining and a unique style. The story is told as a continuous, breathless, unedited, first-person monologue.",
     "favorite": true
   },
-    "favorite": true
-  },
   {
-    "id": "digital-fortress",
-    "title": "Digital Fortress",
-    "author": "Dan Brown",
-    "rating": 3.0,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "This one was a tough read. Too many glaring inconsistencies with reality.",
-    "favorite": false
-  },
-  {
-    "id": "flash-boys",
-    "title": "Flash Boys",
-    "author": "Michael Lewis",
-    "rating": 4.0,
-    "yearRead": 2026,
-    "genre": "Finance",
-    "notes": "Fun read. Provides interesting insights into the world of High Frequency Trading",
-    "favorite": false
-  },
-  {
-    "id": "origin",
-    "title": "Origin",
-    "author": "Dan Brown",
-    "rating": 3.5,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "Interesting read. The main thing I didn't like is that a cliff-hanger spans almost the whole book. I had to spoil it for myself after enough teasing of the big reveal.",
-    "favorite": false
-  },
-  {
-    "id": "inferno",
-    "title": "Inferno",
-    "author": "Dan Brown",
-    "rating": 4.0,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "Pretty good one.",
-    "favorite": false
-  },
-  {
-    "id": "da-vinci-code",
-    "title": "The Da Vinci Code",
-    "author": "Dan Brown",
-    "rating": 4.5,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "Interesting read. Provocative from a religious standpoint.",
-    "favorite": false
-  },
-  {
-    "id": "angels-and-demons",
-    "title": "Angels & Demons",
-    "author": "Dan Brown",
+    "id": "hawaii",
+    "title": "Hawaii",
+    "author": "James Michener",
     "rating": 5.0,
-    "yearRead": 2026,
-    "genre": "Thriller",
-    "notes": "The first Robert Langdon book, and in my opinion, the best one.",
+    "yearRead": 2023,
+    "genre": "Historical fiction",
+    "notes": "It took me an entire year to read this book. It is an incredible tale of Hawaii, from the origin of the islands to the mid-1900s. One of James Michener's best.",
     "favorite": true
-  },
-    {
-    "id": "art-of-war",
-    "title": "The Art of War",
-    "author": "Sun Tzu",
-    "rating": 3.0,
-    "yearRead": 2026,
-    "genre": "Military Strategy",
-    "notes": "I had been looking forward to this one but ultimately found it underwhelming. It it just a collection of insights about armed conflict.",
-    "favorite": false
-  },
-    {
-    "id": "ghost-wars",
-    "title": "Ghost Wars",
-    "author": "Steve Coll",
-    "rating": 4.0,
-    "yearRead": 2025,
-    "genre": "Non-fiction",
-    "notes": "Interesting content, but tough read. It details CIA activities in the Middle East that preceded and motivated the 9/11 attack.",
-    "favorite": false
-  },
-    {
-    "id": "screwtape-letters",
-    "title": "The Screwtape Letters",
-    "author": "C.S. Lewis",
-    "rating": 3.5,
-    "yearRead": 2025,
-    "genre": "Epistolary Novel",
-    "notes": "A creative idea: a senior demon writing letters to instruct his nephew on how to lead a human into temptation. It was recommended to me, but I found it just okay.",
-    "favorite": false
   }
 ]

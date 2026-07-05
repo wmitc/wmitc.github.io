@@ -34,6 +34,22 @@ import resume from "../data/resume.json";
     }
 
     <section>
+      <h2>Education</h2>
+      {
+        resume.education.map((ed) => (
+          <div class="entry">
+            <div class="entry-head">
+              <span class="role">{ed.school}</span>
+              <span class="dates muted">{ed.dates}</span>
+            </div>
+            <p class="cred">{ed.credential}</p>
+            {ed.details && <p class="muted">{ed.details}</p>}
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
       <h2>Experience</h2>
       {
         resume.experience.map((e) => (
@@ -49,22 +65,6 @@ import resume from "../data/resume.json";
                 <li>{b}</li>
               ))}
             </ul>
-          </div>
-        ))
-      }
-    </section>
-
-    <section>
-      <h2>Education</h2>
-      {
-        resume.education.map((ed) => (
-          <div class="entry">
-            <div class="entry-head">
-              <span class="role">{ed.school}</span>
-              <span class="dates muted">{ed.dates}</span>
-            </div>
-            <p class="cred">{ed.credential}</p>
-            {ed.details && <p class="muted">{ed.details}</p>}
           </div>
         ))
       }

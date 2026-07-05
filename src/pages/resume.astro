@@ -5,7 +5,7 @@ import { SITE } from "../site";
 import resume from "../data/resume.json";
 ---
 
-<BaseLayout title="Résumé" description="Résumé of William Mitchell.">
+<BaseLayout title="Resume" description="Resume of William Mitchell.">
   <article class="resume">
     <header class="head">
       <div>
@@ -70,6 +70,19 @@ import resume from "../data/resume.json";
       }
     </section>
 
+    {
+      resume.awards && resume.awards.length > 0 && (
+        <section>
+          <h2>Awards & Honors</h2>
+          <ul class="awards">
+            {resume.awards.map((a) => (
+              <li>{a}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
     <section>
       <h2>Skills</h2>
       <dl class="skills">
@@ -82,6 +95,7 @@ import resume from "../data/resume.json";
           ))
         }
       </dl>
+      {resume.interests && <p class="interests muted">{resume.interests}</p>}
     </section>
   </article>
 </BaseLayout>
@@ -143,8 +157,19 @@ import resume from "../data/resume.json";
   .entry li {
     margin: 0.25rem 0;
   }
+  .awards {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  .awards li {
+    margin: 0.3rem 0;
+  }
   .skills {
     margin: 0;
+  }
+  .interests {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
   }
   .skill-row {
     display: flex;

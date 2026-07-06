@@ -48,4 +48,21 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { projects, books, posts };
+// Race results, edited as a single JSON data file: src/data/races.json
+const races = defineCollection({
+  loader: file("src/data/races.json"),
+  schema: z.object({
+    race: z.string(),
+    distance: z.string(),
+    // Finish time, e.g. "21:05" or "3:24:15".
+    time: z.string(),
+    // ISO date "YYYY-MM-DD"; the page sorts most recent first.
+    date: z.string(),
+    location: z.string().optional(),
+    notes: z.string().optional(),
+    // Personal record — highlighted with a PR badge on the page.
+    pr: z.boolean().default(false),
+  }),
+});
+
+export const collections = { projects, books, posts, races };

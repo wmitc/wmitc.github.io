@@ -1,0 +1,155 @@
+[
+  {
+    "id": "parkrun-5k",
+    "race": "Parkrun 5K",
+    "distance": "5K",
+    "time": "18:29",
+    "date": "2024-06-01",
+    "location": "Boston",
+    "pr": false
+  },
+  {
+    "id": "football-frenzy-5k",
+    "race": "Football Frenzy 5K",
+    "distance": "5K",
+    "time": "18:04",
+    "date": "2025-09-20",
+    "location": "Fort Meade",
+    "pr": false
+  },
+  {
+    "id": "cancer-awarness-5k",
+    "race": "Cancer Awareness 5K",
+    "distance": "5K",
+    "time": "18:05",
+    "date": "2024-09-07",
+    "location": "Fort Gordon",
+    "pr": false
+  },
+  {
+    "id": "color-run-5k",
+    "race": "Color Run 5K",
+    "distance": "5K",
+    "time": "18:40",
+    "date": "2024-08-17",
+    "location": "Fort Meade",
+    "pr": false
+  },
+  {
+    "id": "jimmy-fund-5k",
+    "race": "Jimmy Fund 5K",
+    "distance": "5K",
+    "time": "23:50",
+    "date": "2023-06-10",
+    "location": "Boston",
+    "pr": false
+  },
+  {
+    "id": "big-kahuna-5k",
+    "race": "Big Kahuna 5K",
+    "distance": "5K",
+    "time": "21:41",
+    "date": "2021-08-27",
+    "location": "Fort Carson",
+    "pr": false
+  },
+  {
+    "id": "monster-dash-5k",
+    "race": "Monster Dash 5K",
+    "distance": "5K",
+    "time": "17:54",
+    "date": "2025-10-25",
+    "location": "Fort Meade",
+    "pr": true
+  },
+  {
+    "id": "250th-army-birthday-5k",
+    "race": "250th Army Birthday 5K",
+    "distance": "5K",
+    "time": "18:17",
+    "date": "2025-06-07",
+    "location": "Fort Meade",
+    "pr": false
+  },
+  {
+    "id": "cambridge-half-2025",
+    "race": "Cambridge Half Marathon",
+    "distance": "Half marathon",
+    "time": "1:18:55",
+    "date": "2025-11-02",
+    "location": "Cambridge",
+    "pr": true
+  },
+  {
+    "id": "boston-half",
+    "race": "Boston Half Marathon",
+    "distance": "Half marathon",
+    "time": "1:30:15",
+    "date": "2022-11-13",
+    "location": "Boston",
+    "pr": false
+  },
+  {
+    "id": "superhero-half",
+    "race": "Superhero Half Marathon",
+    "distance": "Half marathon",
+    "time": "1:21:11",
+    "date": "2018-06-09",
+    "location": "San Francisco Bay Area",
+    "pr": false
+  },
+  {
+    "id": "cambridge-half-2017",
+    "race": "Cambridge Half Marathon",
+    "distance": "Half marathon",
+    "time": "1:26:21",
+    "date": "2017-11-19",
+    "location": "Cambridge",
+    "pr": false
+  },
+  {
+    "id": "palmetto-peach-half",
+    "race": "Palmetto Peach Half Marathon",
+    "distance": "Half marathon",
+    "time": "1:28:59",
+    "date": "2024-11-13",
+    "location": "Augusta, GA",
+    "pr": false
+  },
+  {
+    "id": "mount-sneffels-marathon",
+    "race": "Mount Sneffel's Marathon",
+    "distance": "Marathon",
+    "time": "4:07:46",
+    "date": "2017-08-12",
+    "location": "Ouray, CO",
+    "pr": false
+  },
+  {
+    "id": "sugarloaf-marathon",
+    "race": "Sugarloaf Marathon",
+    "distance": "Marathon",
+    "time": "2:54:57",
+    "date": "2024-05-12",
+    "location": "Carrabassett Valley, CE",
+    "pr": true
+  },
+  {
+    "id": "army-10-miler",
+    "race": "Army Ten-Miler",
+    "distance": "10 Miles",
+    "time": "1:02:15",
+    "date": "2025-10-12",
+    "location": "Washington D.C.",
+    "pr": true
+  },
+  {
+    "id": "cherry-pit-10-miler",
+    "race": "Cherry Pit 10 Mile Race",
+    "distance": "10 Miles",
+    "time": "1:04:30",
+    "date": "2025-04-27",
+    "location": "Edgewater, MD",
+    "pr": false
+  }
+]

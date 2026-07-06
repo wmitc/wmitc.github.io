@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Run From Snake</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --grid-line: #151a24;
+    --text: #d8e0f0;
+    --accent: #39ff88;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #layout {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 12px;
+  }
+  canvas {
+    background: var(--bg);
+    border: 1px solid #1d2433;
+    border-radius: 6px;
+    max-width: min(94vw, 92vh);
+    max-height: min(94vw, 92vh);
+  }
+  #panel {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 190px;
+    user-select: none;
+  }
+  #panel h1 {
+    font-size: 24px;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-shadow: 0 0 14px rgba(57, 255, 136, 0.45);
+  }
+  .stat label {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5c6780;
+    margin-bottom: 2px;
+  }
+  .stat .value {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+  }
+  #score { font-size: 44px; }
+  #powerup {
+    min-height: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  #hint {
+    font-size: 13px;
+    color: #5c6780;
+    max-width: 190px;
+  }
+</style>
+</head>
+<body>
+  <div id="layout">
+    <canvas id="game" width="720" height="720"></canvas>
+    <aside id="panel">
+      <h1>Run from<br>Snake</h1>
+      <div class="stat">
+        <label>Score</label>
+        <div class="value" id="score">0</div>
+      </div>
+      <div class="stat">
+        <label>Best</label>
+        <div class="value" id="best">0</div>
+      </div>
+      <div class="stat">
+        <label>Pellets</label>
+        <div class="value" id="pellets">0</div>
+      </div>
+      <div id="powerup"></div>
+      <div id="hint">WASD / arrows to move — you are the apple. Run.</div>
+    </aside>
+  </div>
+
+<script>
+"use strict";
+
+// ---------------------------------------------------------------------------
+// Config — all tuning knobs live here
+// ---------------------------------------------------------------------------
+const CONFIG = {
+  gridSize: 24,          // cells per side
+  cellPx: 30,            // canvas pixels per cell
+  logicHz: 60,           // fixed logic updates per second
+  playerStepMs: 110,     // ms per grid step while a direction is held
+  snakeStepMs: 200,      // starting ms per snake step (speeds up per pellet)
+  snakeStartLength: 4,
+  snakeSpeedupMs: 3,     // snake step interval shrinks this much per pellet
+  snakeStepMsFloor: 130, // snake never gets faster than this (player is 110)
+  pelletScore: 10,
+  pelletMinDistPlayer: 4,    // don't spawn pellets in the player's lap...
+  pelletMinDistSnakeHead: 5, // ...or in the snake's jaws
+  tier1Pellets: 10,          // snake starts mixing in BFS lookahead
+  tier2Pellets: 20,          // BFS most moves
+  secondSnakePellets: 30,    // a second, shorter snake joins the hunt
+  secondSnakeHandicapMs: 40, // the newcomer starts slower than the veteran
+  goldenScore: 50,           // 5x — the greed tax
+  goldenEveryMin: 6,         // golden pellet due every 6-10 normal pellets
+  goldenEveryMax: 10,
+  goldenLifetime: 6,         // seconds before it despawns
+  bonusEveryMin: 6,          // bonus pellet due every 6-10 normal pellets
+  bonusEveryMax: 10,
+  bonusLifetime: 8,          // seconds before it despawns
+  speedBoostStepMs: 80,      // boosted player step (normal is 110)
+  speedBoostDur: 5,          // seconds of boost
+  ghostDur: 4,               // seconds of invincibility
+  freezeDur: 2.5,            // seconds all snakes stand still
+  shrinkSegments: 6,         // segments each snake loses to a shrink pellet
+  deathSlowmo: 0.15,         // time scale during the death cam
+  deathCamSecs: 0.8,         // real-time length of the death cam
+  nearMissShake: 4,          // px of screen shake when the head grazes you
+  deathShake: 10,
+  musicVolume: 0.16,
+  musicBaseBpm: 128,         // tempo climbs with pellets eaten...
+  musicMaxBpm: 176,          // ...up to here
+  deathInputLockMs: 400, // ignore restart keys briefly after death
+};
+
+// ---------------------------------------------------------------------------
+// Canvas setup
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = CONFIG.gridSize * CONFIG.cellPx;
+canvas.height = CONFIG.gridSize * CONFIG.cellPx;
+
+const hud = {
+  score: document.getElementById("score"),
+  best: document.getElementById("best"),
+  pellets: document.getElementById("pellets"),
+  powerup: document.getElementById("powerup"),
+};
+
+// ---------------------------------------------------------------------------
+// Game state machine
+// ---------------------------------------------------------------------------
+const State = { TITLE: "title", PLAYING: "playing", PAUSED: "paused", DYING: "dying", DEAD: "dead" };
+
+const game = {
+  state: State.TITLE,
+  score: 0,
+  best: 0,
+  pellets: 0,  // pellets eaten this run — drives all escalation
+  time: 0,     // seconds of game time elapsed this run
+  diedAt: 0,   // wall-clock ms of death, for restart input lockout
+  dyingTimer: 0, // real seconds elapsed in the death cam
+  freezeUntil: 0, // game.time until which all snakes stand still
+  announce: null, // {text, until} — brief center-screen telegraph
+};
+
+function announce(text, seconds = 2.2) {
+  game.announce = { text, until: game.time + seconds };
+}
+
+// ---------------------------------------------------------------------------
+// Directions & input — most recently pressed held key wins; releasing it
+// falls back to the next most recent still-held key (instant turns).
+// ---------------------------------------------------------------------------
+const DIRS = {
+  up:    { x: 0, y: -1 },
+  down:  { x: 0, y: 1 },
+  left:  { x: -1, y: 0 },
+  right: { x: 1, y: 0 },
+};
+
+const KEYMAP = {
+  ArrowUp: "up", KeyW: "up",
+  ArrowDown: "down", KeyS: "down",
+  ArrowLeft: "left", KeyA: "left",
+  ArrowRight: "right", KeyD: "right",
+};
+
+const heldDirs = []; // stack of direction names, newest last
+
+function currentDir() {
+  return heldDirs.length ? DIRS[heldDirs[heldDirs.length - 1]] : null;
+}
+
+// ---------------------------------------------------------------------------
+// Player — a small critter on the grid; steps while a direction is held
+// ---------------------------------------------------------------------------
+const player = {
+  x: 0, y: 0,           // current grid cell
+  px: 0, py: 0,         // previous cell, for render interpolation
+  stepTimer: 0,         // ms since last step
+  moving: false,
+  speedUntil: 0,        // game.time until which the speed boost runs
+  ghostUntil: 0,        // game.time until which you're untouchable
+};
+
+function resetPlayer() {
+  player.x = Math.floor(CONFIG.gridSize / 2);
+  player.y = Math.floor(CONFIG.gridSize / 2);
+  player.px = player.x;
+  player.py = player.y;
+  player.stepTimer = 0;
+  player.moving = false;
+  player.speedUntil = 0;
+  player.ghostUntil = 0;
+}
+
+function playerStepMs() {
+  return speedActive() ? CONFIG.speedBoostStepMs : CONFIG.playerStepMs;
+}
+
+function updatePlayer(dtMs) {
+  const dir = currentDir();
+  player.stepTimer += dtMs;
+  if (player.stepTimer < playerStepMs()) return;
+
+  if (!dir) {
+    player.moving = false;
+    player.px = player.x;
+    player.py = player.y;
+    player.stepTimer = playerStepMs(); // step instantly when input resumes
+    return;
+  }
+
+  const nx = player.x + dir.x;
+  const ny = player.y + dir.y;
+  player.px = player.x;
+  player.py = player.y;
+  if (inBounds(nx, ny)) {
+    player.x = nx;
+    player.y = ny;
+    player.moving = true;
+    if (pellet && pellet.x === player.x && pellet.y === player.y) collectPellet();
+    if (golden && golden.x === player.x && golden.y === player.y) collectGolden();
+    if (bonus && bonus.x === player.x && bonus.y === player.y) collectBonus();
+  } else {
+    player.moving = false; // walls: stay put, keep facing
+  }
+  player.stepTimer = 0;
+}
+
+function inBounds(x, y) {
+  return x >= 0 && x < CONFIG.gridSize && y >= 0 && y < CONFIG.gridSize;
+}
+
+// ---------------------------------------------------------------------------
+// Snakes — head-first segment arrays. A snake never dies; when the player
+// walls it in with its own coils it "compresses": the tail retracts one cell
+// per stalled step and regrows after escape, so trapping buys time, not kills.
+// ---------------------------------------------------------------------------
+const snakes = [];
+
+function makeSnake(x, y, length, stepMs) {
+  const segments = [];
+  for (let i = 0; i < length; i++) segments.push({ x, y }); // uncoils as it moves
+  return {
+    segments,             // [0] is the head
+    prevSegments: segments.map(s => ({ ...s })),
+    dir: { x: 1, y: 0 },
+    stepMs,
+    stepTimer: 0,
+    pendingGrowth: 0,
+    greedyOnly: false,    // extra snakes stay dumb; only the first gets tiers
+    moveCount: 0,
+    bornAt: 0,            // game.time at spawn, for the arrival flash
+  };
+}
+
+// Difficulty tier of the main snake, driven by pellets eaten this run
+function aiTier() {
+  if (game.pellets >= CONFIG.tier2Pellets) return 2;
+  if (game.pellets >= CONFIG.tier1Pellets) return 1;
+  return 0;
+}
+
+function snakeOccupies(x, y) {
+  return snakes.some(s => s.segments.some(seg => seg.x === x && seg.y === y));
+}
+
+// Cells a snake head may enter: in bounds and not covered by any snake body.
+// Each snake's own tail tip counts as free because it vacates on the same step.
+function isCellFreeForSnake(snake, x, y) {
+  if (!inBounds(x, y)) return false;
+  for (const s of snakes) {
+    const body = s.segments;
+    const skipTail = s === snake && s.pendingGrowth === 0;
+    const limit = skipTail ? body.length - 1 : body.length;
+    for (let i = 0; i < limit; i++) {
+      if (body[i].x === x && body[i].y === y) return false;
+    }
+  }
+  return true;
+}
+
+// Greedy chase: step to the legal neighbor closest (Manhattan) to the player,
+// preferring the current heading on ties so the snake commits to lines.
+function greedyMove(snake) {
+  const head = snake.segments[0];
+  let best = null;
+  let bestDist = Infinity;
+  for (const name of ["up", "down", "left", "right"]) {
+    const d = DIRS[name];
+    const nx = head.x + d.x;
+    const ny = head.y + d.y;
+    if (!isCellFreeForSnake(snake, nx, ny)) continue;
+    const dist = Math.abs(nx - player.x) + Math.abs(ny - player.y);
+    const straight = d.x === snake.dir.x && d.y === snake.dir.y;
+    if (dist < bestDist || (dist === bestDist && straight)) {
+      bestDist = dist;
+      best = d;
+    }
+  }
+  return best; // null = fully blocked
+}
+
+// BFS lookahead: first step of a true shortest path to the player, routing
+// around every snake body. Falls back to greedy when no path exists.
+function bfsMove(snake) {
+  const N = CONFIG.gridSize;
+  const head = snake.segments[0];
+  const cameFrom = new Int16Array(N * N).fill(-1);
+  const idx = (x, y) => y * N + x;
+  cameFrom[idx(head.x, head.y)] = idx(head.x, head.y);
+  const queue = [[head.x, head.y]];
+
+  while (queue.length) {
+    const [x, y] = queue.shift();
+    if (x === player.x && y === player.y) {
+      // walk back to the step taken from the head
+      let cur = idx(x, y);
+      let prev = cameFrom[cur];
+      while (prev !== idx(head.x, head.y)) {
+        cur = prev;
+        prev = cameFrom[cur];
+      }
+      const step = { x: cur % N - head.x, y: Math.floor(cur / N) - head.y };
+      return step;
+    }
+    for (const name of ["up", "down", "left", "right"]) {
+      const d = DIRS[name];
+      const nx = x + d.x;
+      const ny = y + d.y;
+      if (!inBounds(nx, ny) || cameFrom[idx(nx, ny)] !== -1) continue;
+      const isTarget = nx === player.x && ny === player.y;
+      if (!isTarget && !isCellFreeForSnake(snake, nx, ny)) continue;
+      cameFrom[idx(nx, ny)] = idx(x, y);
+      queue.push([nx, ny]);
+    }
+  }
+  return greedyMove(snake); // player unreachable: press on greedily
+}
+
+// Higher tiers mix true pathfinding into the greedy chase — harder to juke,
+// still baitable in the moves that stay greedy.
+function chooseSnakeMove(snake) {
+  const tier = snake.greedyOnly ? 0 : aiTier();
+  if (tier === 1 && snake.moveCount % 2 === 0) return bfsMove(snake);
+  if (tier === 2 && snake.moveCount % 4 !== 0) return bfsMove(snake);
+  return greedyMove(snake);
+}
+
+function stepSnake(snake) {
+  snake.prevSegments = snake.segments.map(s => ({ ...s }));
+  snake.moveCount++;
+  const move = chooseSnakeMove(snake);
+
+  if (!move) {
+    // Trapped in its own coils: compress. Tail retracts; length owed back.
+    if (snake.segments.length > 1) {
+      snake.segments.pop();
+      snake.prevSegments.pop();
+      snake.pendingGrowth++;
+    }
+    return;
+  }
+
+  snake.dir = move;
+  const head = snake.segments[0];
+  snake.segments.unshift({ x: head.x + move.x, y: head.y + move.y });
+  if (snake.pendingGrowth > 0) {
+    snake.pendingGrowth--; // keep the tail: regrow one owed segment
+  } else {
+    snake.segments.pop();
+  }
+}
+
+function updateSnakes(dtMs) {
+  if (freezeActive()) return; // step timers hold; they thaw mid-stride
+  for (const snake of snakes) {
+    snake.stepTimer += dtMs;
+    while (snake.stepTimer >= snake.stepMs) {
+      snake.stepTimer -= snake.stepMs;
+      stepSnake(snake);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pellets — one at a time; every one you grab feeds the thing chasing you
+// ---------------------------------------------------------------------------
+let pellet = null; // {x, y}
+
+function dist(ax, ay, bx, by) {
+  return Math.abs(ax - bx) + Math.abs(ay - by);
+}
+
+// Pick a random free cell, preferring one clear of the player and snake
+// heads. Constraints relax if the board is too crowded to satisfy them.
+function spawnPellet() {
+  const candidates = [];
+  for (let y = 0; y < CONFIG.gridSize; y++) {
+    for (let x = 0; x < CONFIG.gridSize; x++) {
+      if (snakeOccupies(x, y)) continue;
+      if (x === player.x && y === player.y) continue;
+      if (golden && golden.x === x && golden.y === y) continue;
+      if (bonus && bonus.x === x && bonus.y === y) continue;
+      candidates.push({ x, y });
+    }
+  }
+  if (candidates.length === 0) { pellet = null; return; }
+
+  const comfortable = candidates.filter(c =>
+    dist(c.x, c.y, player.x, player.y) >= CONFIG.pelletMinDistPlayer &&
+    snakes.every(s => dist(c.x, c.y, s.segments[0].x, s.segments[0].y) >= CONFIG.pelletMinDistSnakeHead)
+  );
+  const pool = comfortable.length ? comfortable : candidates;
+  pellet = { ...pool[Math.floor(Math.random() * pool.length)] };
+}
+
+// ---------------------------------------------------------------------------
+// Golden pellet — worth 5x, always spawns in the snake's shadow, always
+// skippable, always tempting. Pure greed reward: it does NOT grow the snake.
+// ---------------------------------------------------------------------------
+let golden = null; // {x, y, expiresAt}
+let nextGoldenAt = 0; // pellet count that summons the next one
+
+function scheduleGolden() {
+  nextGoldenAt = game.pellets + CONFIG.goldenEveryMin +
+    Math.floor(Math.random() * (CONFIG.goldenEveryMax - CONFIG.goldenEveryMin + 1));
+}
+
+// Free cells hugging the snake's body; "pocket" cells (2+ snake neighbors,
+// i.e. half-enclosed by coils) are preferred — maximum temptation.
+function spawnGolden() {
+  const adjacent = [];
+  const pockets = [];
+  for (let y = 0; y < CONFIG.gridSize; y++) {
+    for (let x = 0; x < CONFIG.gridSize; x++) {
+      if (snakeOccupies(x, y)) continue;
+      if (x === player.x && y === player.y) continue;
+      if (pellet && pellet.x === x && pellet.y === y) continue;
+      if (bonus && bonus.x === x && bonus.y === y) continue;
+      let snakeNeighbors = 0;
+      for (const d of Object.values(DIRS)) {
+        if (snakeOccupies(x + d.x, y + d.y)) snakeNeighbors++;
+      }
+      if (snakeNeighbors >= 2) pockets.push({ x, y });
+      else if (snakeNeighbors === 1) adjacent.push({ x, y });
+    }
+  }
+  const pool = pockets.length ? pockets : adjacent;
+  if (!pool.length) return; // snake too tidy right now; try again next pellet
+  const cell = pool[Math.floor(Math.random() * pool.length)];
+  golden = { ...cell, expiresAt: game.time + CONFIG.goldenLifetime };
+}
+
+function updateGolden() {
+  if (golden && game.time > golden.expiresAt) golden = null; // chickened out
+}
+
+function collectGolden() {
+  game.score += CONFIG.goldenScore;
+  hud.score.textContent = game.score;
+  golden = null;
+  playGoldenSfx();
+}
+
+function collectPellet() {
+  game.score += CONFIG.pelletScore;
+  game.pellets++;
+  hud.score.textContent = game.score;
+  hud.pellets.textContent = game.pellets;
+  playPelletSfx();
+
+  // Your success feeds the enemy: +1 segment, a touch more speed
+  for (const snake of snakes) {
+    snake.pendingGrowth++;
+    snake.stepMs = Math.max(CONFIG.snakeStepMsFloor, snake.stepMs - CONFIG.snakeSpeedupMs);
+    snake.grewAt = game.time; // tail-snap flash
+  }
+
+  if (game.pellets === CONFIG.tier1Pellets) announce("the snake grows cunning");
+  if (game.pellets === CONFIG.tier2Pellets) announce("it sees your paths");
+  if (game.pellets >= CONFIG.secondSnakePellets && snakes.length === 1) spawnSecondSnake();
+
+  // a golden pellet comes due every few pellets; retries if placement failed
+  if (!golden && game.pellets >= nextGoldenAt) {
+    spawnGolden();
+    if (golden) scheduleGolden();
+  }
+
+  // bonus pellets run on their own, longer cadence
+  if (!bonus && game.pellets >= nextBonusAt) {
+    spawnBonus();
+    if (bonus) scheduleBonus();
+  }
+
+  spawnPellet();
+}
+
+// A second, shorter hunter — permanently greedy, arrives in the farthest
+// free corner with a speed handicap so the spike reads as chaos, not a wall
+function spawnSecondSnake() {
+  const m = CONFIG.gridSize - 3;
+  const corners = [[2, 2], [m, 2], [2, m], [m, m]]
+    .filter(([cx, cy]) => !snakeOccupies(cx, cy))
+    .sort((a, b) => dist(b[0], b[1], player.x, player.y) - dist(a[0], a[1], player.x, player.y));
+  if (!corners.length) return; // every corner buried in coils; skip the spawn
+  const [cx, cy] = corners[0];
+  const snake = makeSnake(cx, cy, 3, snakes[0].stepMs + CONFIG.secondSnakeHandicapMs);
+  snake.greedyOnly = true;
+  snake.bornAt = game.time;
+  snakes.push(snake);
+  announce("another one.");
+}
+
+// ---------------------------------------------------------------------------
+// Bonus pellets — timed power-ups. Unlike everything else you eat, these
+// don't feed the snake; they're the relief valves.
+// ---------------------------------------------------------------------------
+const BONUS_TYPES = {
+  speed:  { color: "#3fd8ff", label: "speed boost" },
+  ghost:  { color: "#c07dff", label: "ghost" },
+  freeze: { color: "#d9f2ff", label: "freeze" },
+  shrink: { color: "#ff9f40", label: "shrink" },
+};
+
+// Weighted pick: shrink is the only thing that undoes your mistakes, so
+// it's the rarest
+function rollBonusType() {
+  const r = Math.random();
+  if (r < 0.30) return "speed";
+  if (r < 0.60) return "ghost";
+  if (r < 0.85) return "freeze";
+  return "shrink";
+}
+
+let bonus = null; // {type, x, y, expiresAt}
+let nextBonusAt = 0;
+
+function scheduleBonus() {
+  nextBonusAt = game.pellets + CONFIG.bonusEveryMin +
+    Math.floor(Math.random() * (CONFIG.bonusEveryMax - CONFIG.bonusEveryMin + 1));
+}
+
+function spawnBonus() {
+  const candidates = [];
+  for (let y = 0; y < CONFIG.gridSize; y++) {
+    for (let x = 0; x < CONFIG.gridSize; x++) {
+      if (snakeOccupies(x, y)) continue;
+      if (x === player.x && y === player.y) continue;
+      if (pellet && pellet.x === x && pellet.y === y) continue;
+      if (golden && golden.x === x && golden.y === y) continue;
+      if (dist(x, y, player.x, player.y) < 3) continue;
+      if (snakes.some(s => dist(x, y, s.segments[0].x, s.segments[0].y) < 4)) continue;
+      candidates.push({ x, y });
+    }
+  }
+  if (!candidates.length) return;
+  const cell = candidates[Math.floor(Math.random() * candidates.length)];
+  bonus = { type: rollBonusType(), ...cell, expiresAt: game.time + CONFIG.bonusLifetime };
+}
+
+function updateBonus() {
+  if (bonus && game.time > bonus.expiresAt) bonus = null;
+}
+
+function speedActive() { return game.time < player.speedUntil; }
+function ghostActive() { return game.time < player.ghostUntil; }
+function freezeActive() { return game.time < game.freezeUntil; }
+
+function collectBonus() {
+  const type = bonus.type;
+  bonus = null;
+  if (type === "speed") {
+    player.speedUntil = game.time + CONFIG.speedBoostDur;
+  } else if (type === "ghost") {
+    player.ghostUntil = game.time + CONFIG.ghostDur;
+  } else if (type === "freeze") {
+    game.freezeUntil = game.time + CONFIG.freezeDur;
+  } else if (type === "shrink") {
+    shrinkSnakes();
+  }
+  announce(BONUS_TYPES[type].label + "!", 1.2);
+  playBonusSfx(type);
+}
+
+// The one mercy in the game: every snake sheds segments, no score price.
+// Owed growth is cancelled before real segments come off.
+function shrinkSnakes() {
+  for (const snake of snakes) {
+    let toRemove = CONFIG.shrinkSegments;
+    const cancelled = Math.min(toRemove, snake.pendingGrowth);
+    snake.pendingGrowth -= cancelled;
+    toRemove -= cancelled;
+    while (toRemove-- > 0 && snake.segments.length > 2) {
+      snake.segments.pop();
+      snake.prevSegments.pop();
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Death — touching any snake segment, head or body
+// ---------------------------------------------------------------------------
+function checkDeath() {
+  if (ghostActive()) return; // untouchable — walk right through the coils
+
+  if (snakeOccupies(player.x, player.y)) {
+    // Death cam: the world drops into slow-mo while the head slides in
+    game.state = State.DYING;
+    game.dyingTimer = 0;
+    addShake(CONFIG.deathShake);
+    stopMusic();
+    playDeathSting();
+    return;
+  }
+
+  // Near miss: any snake head within a king's move — flinch
+  for (const s of snakes) {
+    const h = s.segments[0];
+    if (Math.abs(h.x - player.x) <= 1 && Math.abs(h.y - player.y) <= 1 &&
+        game.time - lastNearMiss > 0.6) {
+      lastNearMiss = game.time;
+      addShake(CONFIG.nearMissShake);
+      playWhoosh();
+    }
+  }
+}
+
+// Side-panel power-up readout with a live countdown
+function updatePowerupHud() {
+  let text = "";
+  let color = "";
+  if (ghostActive()) {
+    text = `ghost ${(player.ghostUntil - game.time).toFixed(1)}s`;
+    color = BONUS_TYPES.ghost.color;
+  } else if (freezeActive()) {
+    text = `freeze ${(game.freezeUntil - game.time).toFixed(1)}s`;
+    color = BONUS_TYPES.freeze.color;
+  } else if (speedActive()) {
+    text = `speed ${(player.speedUntil - game.time).toFixed(1)}s`;
+    color = BONUS_TYPES.speed.color;
+  }
+  if (hud.powerup.textContent !== text) hud.powerup.textContent = text;
+  hud.powerup.style.color = color;
+}
+
+function finishDying() {
+  game.state = State.DEAD;
+  game.diedAt = performance.now();
+  if (game.score > game.best) {
+    game.best = game.score;
+    try { localStorage.setItem("runFromSnake.best", String(game.best)); } catch {}
+  }
+  hud.best.textContent = game.best;
+}
+
+// ---------------------------------------------------------------------------
+// Music — a procedural chiptune loop (Web Audio, no assets). The tempo
+// climbs with your pellet count: the better you do, the more it panics.
+// ---------------------------------------------------------------------------
+const music = {
+  ctx: null,
+  master: null,
+  timer: null,     // scheduler interval id
+  nextNoteTime: 0,
+  step: 0,
+  muted: false,
+};
+
+// A-minor, 16 eighth-note steps per loop. 0 = rest.
+const BASS_SEQ = [45, 0, 45, 57, 41, 0, 41, 53, 43, 0, 43, 55, 45, 0, 43, 41];
+const LEAD_SEQ = [69, 72, 76, 72, 65, 69, 72, 69, 67, 71, 74, 71, 69, 72, 76, 79];
+
+function midiToFreq(m) {
+  return 440 * Math.pow(2, (m - 69) / 12);
+}
+
+function initAudio() {
+  if (music.ctx) return;
+  music.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  music.master = music.ctx.createGain();
+  music.master.gain.value = music.muted ? 0 : CONFIG.musicVolume;
+  music.master.connect(music.ctx.destination);
+}
+
+function blip(freq, time, dur, type, gain) {
+  const osc = music.ctx.createOscillator();
+  const env = music.ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  env.gain.setValueAtTime(gain, time);
+  env.gain.exponentialRampToValueAtTime(0.001, time + dur);
+  osc.connect(env).connect(music.master);
+  osc.start(time);
+  osc.stop(time + dur);
+}
+
+function currentBpm() {
+  return Math.min(CONFIG.musicMaxBpm, CONFIG.musicBaseBpm + game.pellets * 1.5);
+}
+
+function scheduleStep(step, time) {
+  const stepDur = 60 / currentBpm() / 2; // eighth notes
+  if (BASS_SEQ[step]) blip(midiToFreq(BASS_SEQ[step] - 12), time, stepDur * 1.8, "triangle", 0.9);
+  if (LEAD_SEQ[step]) blip(midiToFreq(LEAD_SEQ[step]), time, stepDur * 0.9, "square", 0.22);
+  if (step % 4 === 2) blip(7500, time, 0.03, "square", 0.12); // offbeat hat
+}
+
+function startMusic() {
+  initAudio();
+  music.ctx.resume();
+  if (music.timer) return;
+  music.step = 0;
+  music.nextNoteTime = music.ctx.currentTime + 0.06;
+  music.timer = setInterval(() => {
+    // standard lookahead scheduler: queue everything due in the next 120ms
+    while (music.nextNoteTime < music.ctx.currentTime + 0.12) {
+      scheduleStep(music.step, music.nextNoteTime);
+      music.nextNoteTime += 60 / currentBpm() / 2;
+      music.step = (music.step + 1) % 16;
+    }
+  }, 30);
+}
+
+function stopMusic() {
+  if (music.timer) {
+    clearInterval(music.timer);
+    music.timer = null;
+  }
+}
+
+// Near-miss whoosh: a burst of filtered noise sweeping down — air displaced
+// by a head that almost had you
+function playWhoosh() {
+  if (!music.ctx) return;
+  const ctx = music.ctx;
+  const t = ctx.currentTime;
+  const dur = 0.18;
+  const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const bp = ctx.createBiquadFilter();
+  bp.type = "bandpass";
+  bp.Q.value = 1.2;
+  bp.frequency.setValueAtTime(1600, t);
+  bp.frequency.exponentialRampToValueAtTime(350, t + dur);
+  const env = ctx.createGain();
+  env.gain.setValueAtTime(0.5, t);
+  env.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  src.connect(bp).connect(env).connect(music.master);
+  src.start(t);
+}
+
+// Pickup sounds — routed through the master gain, so M mutes them too
+function playPelletSfx() {
+  if (!music.ctx) return;
+  const t = music.ctx.currentTime;
+  blip(660, t, 0.07, "square", 0.24);
+  blip(880, t + 0.06, 0.12, "square", 0.24);
+}
+
+// The golden gets the full coin fanfare it was gambled for
+function playGoldenSfx() {
+  if (!music.ctx) return;
+  const t = music.ctx.currentTime;
+  blip(988, t, 0.09, "square", 0.28);
+  blip(1319, t + 0.08, 0.38, "square", 0.28);
+}
+
+function playBonusSfx(type) {
+  if (!music.ctx) return;
+  const t = music.ctx.currentTime;
+  if (type === "speed") {
+    // fast rising triplet — gotta go fast
+    blip(523, t, 0.06, "square", 0.26);
+    blip(659, t + 0.05, 0.06, "square", 0.26);
+    blip(784, t + 0.10, 0.18, "square", 0.26);
+  } else if (type === "ghost") {
+    // hollow slide — something just phased out of reality
+    blip(392, t, 0.3, "triangle", 0.4);
+    blip(554, t + 0.12, 0.4, "triangle", 0.35);
+  } else if (type === "freeze") {
+    // high glassy shimmer — everything crystallizes
+    blip(1568, t, 0.12, "triangle", 0.35);
+    blip(2093, t + 0.08, 0.16, "triangle", 0.3);
+    blip(2637, t + 0.16, 0.28, "triangle", 0.25);
+  } else {
+    // descending pop-pop-pop — segments falling off
+    blip(660, t, 0.08, "square", 0.26);
+    blip(494, t + 0.09, 0.08, "square", 0.26);
+    blip(330, t + 0.18, 0.16, "square", 0.26);
+  }
+}
+
+// Descending three-note sting as the head closes in
+function playDeathSting() {
+  if (!music.ctx) return;
+  const t = music.ctx.currentTime;
+  blip(midiToFreq(57), t, 0.28, "square", 0.3);
+  blip(midiToFreq(51), t + 0.22, 0.28, "square", 0.3);
+  blip(midiToFreq(45), t + 0.44, 0.7, "square", 0.32);
+}
+
+// ---------------------------------------------------------------------------
+// Pause — P toggles; losing window focus pauses too. game.time freezes, so
+// every timer in the game (golden, effects, cooldowns) freezes with it.
+// ---------------------------------------------------------------------------
+function togglePause() {
+  if (game.state === State.PLAYING) {
+    game.state = State.PAUSED;
+    if (music.ctx) music.ctx.suspend();
+  } else if (game.state === State.PAUSED) {
+    game.state = State.PLAYING;
+    if (music.ctx) music.ctx.resume();
+  }
+}
+
+function toggleMute() {
+  music.muted = !music.muted;
+  if (music.master) music.master.gain.value = music.muted ? 0 : CONFIG.musicVolume;
+  try { localStorage.setItem("runFromSnake.muted", music.muted ? "1" : "0"); } catch {}
+  document.getElementById("hint").textContent = hintText();
+}
+
+function hintText() {
+  return `WASD / arrows to move — P pauses, M ${music.muted ? "unmutes" : "mutes"}. You are the apple. Run.`;
+}
+
+// ---------------------------------------------------------------------------
+// Screen shake — magnitude decays; render offsets the whole arena
+// ---------------------------------------------------------------------------
+let shakeMag = 0;
+let lastNearMiss = -1;
+
+function addShake(mag) {
+  shakeMag = Math.max(shakeMag, mag);
+}
+
+function resetRun() {
+  game.score = 0;
+  game.pellets = 0;
+  game.time = 0;
+  game.announce = null;
+  game.freezeUntil = 0;
+  hud.score.textContent = "0";
+  hud.pellets.textContent = "0";
+  resetPlayer();
+  snakes.length = 0;
+  snakes.push(makeSnake(2, 2, CONFIG.snakeStartLength, CONFIG.snakeStepMs));
+  golden = null;
+  scheduleGolden();
+  bonus = null;
+  scheduleBonus();
+  spawnPellet();
+  shakeMag = 0;
+  lastNearMiss = -1;
+  startMusic();
+  game.state = State.PLAYING;
+}
+
+// ---------------------------------------------------------------------------
+// Fixed-timestep game loop
+// ---------------------------------------------------------------------------
+const STEP = 1 / CONFIG.logicHz;
+let lastTime = performance.now();
+let accumulator = 0;
+
+function frame(now) {
+  let dt = (now - lastTime) / 1000;
+  lastTime = now;
+  dt = Math.min(dt, 0.25); // clamp huge tab-switch deltas
+
+  accumulator += dt;
+  while (accumulator >= STEP) {
+    update(STEP);
+    accumulator -= STEP;
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+
+function update(dt) {
+  shakeMag = Math.max(0, shakeMag - dt * 18);
+
+  if (game.state === State.DYING) {
+    // slow-mo: the snake finishes its bite while the clock crawls
+    game.dyingTimer += dt;
+    game.time += dt * CONFIG.deathSlowmo;
+    updateSnakes(dt * 1000 * CONFIG.deathSlowmo);
+    if (game.dyingTimer >= CONFIG.deathCamSecs) finishDying();
+    return;
+  }
+
+  if (game.state !== State.PLAYING) return;
+  game.time += dt;
+  updatePlayer(dt * 1000);
+  updateSnakes(dt * 1000);
+  updateGolden();
+  updateBonus();
+  checkDeath();
+  updatePowerupHud();
+}
+
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+function render() {
+  const css = getComputedStyle(document.documentElement);
+  ctx.fillStyle = css.getPropertyValue("--bg");
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  if (shakeMag > 0.1) {
+    ctx.translate((Math.random() - 0.5) * 2 * shakeMag,
+                  (Math.random() - 0.5) * 2 * shakeMag);
+  }
+
+  drawGrid();
+
+  if (game.state === State.TITLE) {
+    drawTitle();
+  } else {
+    drawPellet();
+    drawGolden();
+    drawBonus();
+    for (const snake of snakes) drawSnake(snake);
+    drawPlayer();
+    drawAnnouncement();
+  }
+  ctx.restore();
+
+  if (game.state === State.PAUSED) drawPaused();
+  if (game.state === State.DEAD) drawGameOver();
+}
+
+function drawPaused() {
+  ctx.save();
+  ctx.fillStyle = "rgba(11, 14, 20, 0.72)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#d8e0f0";
+  ctx.font = "700 38px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2 - 8);
+  ctx.fillStyle = "#5c6780";
+  ctx.font = "17px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText("P to resume — the snake waits", canvas.width / 2, canvas.height / 2 + 28);
+  ctx.restore();
+}
+
+function drawAnnouncement() {
+  if (!game.announce || game.time > game.announce.until) return;
+  const remain = game.announce.until - game.time;
+  const alpha = Math.min(1, remain / 0.6); // fade out over the last 0.6s
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ff4d5e";
+  ctx.font = "600 26px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText(game.announce.text, canvas.width / 2, canvas.height * 0.22);
+  ctx.restore();
+}
+
+function drawPellet() {
+  if (!pellet) return;
+  const cx = (pellet.x + 0.5) * CONFIG.cellPx;
+  const cy = (pellet.y + 0.5) * CONFIG.cellPx;
+  ctx.save();
+  ctx.fillStyle = "#ff4d5e";
+  ctx.shadowColor = "#ff4d5e";
+  ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.arc(cx, cy, CONFIG.cellPx * 0.26, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawGolden() {
+  if (!golden) return;
+  const cx = (golden.x + 0.5) * CONFIG.cellPx;
+  const cy = (golden.y + 0.5) * CONFIG.cellPx;
+  const remain = golden.expiresAt - game.time;
+  // pulse speeds up as time runs out — an audible clock, visually
+  const pulse = 1 + 0.18 * Math.sin(game.time * (remain < 2 ? 24 : 8));
+  ctx.save();
+  ctx.globalAlpha = remain < 2 ? 0.55 + 0.45 * Math.sin(game.time * 24) ** 2 : 1;
+  ctx.shadowColor = "#ffd23f";
+  ctx.shadowBlur = 14;
+  ctx.fillStyle = "#ffd23f";
+  ctx.beginPath();
+  ctx.arc(cx, cy, CONFIG.cellPx * 0.3 * pulse, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#fff2b0";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, CONFIG.cellPx * 0.42, 0, Math.PI * 2 * Math.max(remain / CONFIG.goldenLifetime, 0));
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Interpolated pixel-center of an entity between its previous and current cell
+function lerpCenter(e, stepMs = CONFIG.playerStepMs) {
+  const t = Math.min(e.stepTimer / stepMs, 1);
+  const gx = e.px + (e.x - e.px) * t;
+  const gy = e.py + (e.y - e.py) * t;
+  return {
+    x: (gx + 0.5) * CONFIG.cellPx,
+    y: (gy + 0.5) * CONFIG.cellPx,
+  };
+}
+
+function drawSnake(snake) {
+  const t = Math.min(snake.stepTimer / snake.stepMs, 1);
+  const cell = CONFIG.cellPx;
+  const size = cell * 0.86;
+
+  ctx.save();
+
+  // Arrival flash: pulsing ring around a freshly spawned hunter
+  const age = game.time - snake.bornAt;
+  if (snake.bornAt > 0 && age < 1.2) {
+    const head = snake.segments[0];
+    const pulse = 1 + 0.5 * Math.sin(age * 18);
+    ctx.strokeStyle = `rgba(255, 77, 94, ${1 - age / 1.2})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc((head.x + 0.5) * cell, (head.y + 0.5) * cell, cell * pulse, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Neon body with a brighter head; a freshly snapped-on tail segment
+  // flashes white so you watch your mistake grow. Frozen snakes go icy.
+  const frozen = freezeActive();
+  const snapAge = game.time - (snake.grewAt || -1);
+  ctx.shadowColor = frozen ? "#bfe8ff" : "#39ff88";
+  for (let i = snake.segments.length - 1; i >= 0; i--) {
+    const cur = snake.segments[i];
+    const prev = snake.prevSegments[i] || cur;
+    const gx = prev.x + (cur.x - prev.x) * t;
+    const gy = prev.y + (cur.y - prev.y) * t;
+    const isTail = i === snake.segments.length - 1;
+    let s = size;
+    if (frozen) {
+      ctx.fillStyle = i === 0 ? "#e4f6ff" : "#9fd8f5";
+      ctx.shadowBlur = i === 0 ? 18 : 10;
+    } else if (i === 0) {
+      ctx.fillStyle = "#7dffb0";
+      ctx.shadowBlur = 18;
+    } else if (isTail && snapAge < 0.35) {
+      const k = 1 - snapAge / 0.35;
+      ctx.fillStyle = `rgb(${57 + 198 * k}, 255, ${136 + 119 * k})`;
+      ctx.shadowBlur = 12 + 18 * k;
+      s = size * (1 + 0.25 * k);
+    } else {
+      ctx.fillStyle = "#39ff88";
+      ctx.shadowBlur = 10;
+    }
+    roundRect(
+      (gx + 0.5) * cell - s / 2,
+      (gy + 0.5) * cell - s / 2,
+      s, s, s * 0.3
+    );
+  }
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+}
+
+function drawGameOver() {
+  ctx.save();
+  ctx.fillStyle = "rgba(11, 14, 20, 0.72)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#ff4d5e";
+  ctx.font = "700 46px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText("EATEN", canvas.width / 2, canvas.height / 2 - 40);
+  ctx.fillStyle = "#d8e0f0";
+  ctx.font = "22px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText(`score ${game.score}   best ${game.best}`, canvas.width / 2, canvas.height / 2 + 4);
+  if (game.score > 0 && game.score === game.best) {
+    ctx.fillStyle = "#ffd23f";
+    ctx.font = "600 19px 'Segoe UI', system-ui, sans-serif";
+    ctx.fillText("new best", canvas.width / 2, canvas.height / 2 + 36);
+  }
+  ctx.fillStyle = "#5c6780";
+  ctx.font = "17px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText("press any key to run again", canvas.width / 2, canvas.height / 2 + 68);
+  ctx.restore();
+}
+
+// Bonus pellets: speed is a cyan diamond, ghost a hollow violet ring —
+// both with the golden pellet's shrinking timer arc
+function drawBonus() {
+  if (!bonus) return;
+  const spec = BONUS_TYPES[bonus.type];
+  const cx = (bonus.x + 0.5) * CONFIG.cellPx;
+  const cy = (bonus.y + 0.5) * CONFIG.cellPx;
+  const remain = bonus.expiresAt - game.time;
+  const pulse = 1 + 0.15 * Math.sin(game.time * 8);
+  const r = CONFIG.cellPx * 0.3 * pulse;
+
+  ctx.save();
+  ctx.globalAlpha = remain < 2 ? 0.55 + 0.45 * Math.sin(game.time * 24) ** 2 : 1;
+  ctx.shadowColor = spec.color;
+  ctx.shadowBlur = 14;
+  if (bonus.type === "speed") {
+    // cyan diamond
+    ctx.fillStyle = spec.color;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r);
+    ctx.lineTo(cx + r, cy);
+    ctx.lineTo(cx, cy + r);
+    ctx.lineTo(cx - r, cy);
+    ctx.closePath();
+    ctx.fill();
+  } else if (bonus.type === "ghost") {
+    // violet ring
+    ctx.strokeStyle = spec.color;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+    ctx.stroke();
+  } else if (bonus.type === "freeze") {
+    // six-spoke ice crystal
+    ctx.strokeStyle = spec.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let k = 0; k < 3; k++) {
+      const a = game.time * 0.8 + (k * Math.PI) / 3;
+      ctx.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r);
+      ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    ctx.stroke();
+  } else {
+    // orange down-triangle — the snake gets smaller
+    ctx.fillStyle = spec.color;
+    ctx.beginPath();
+    ctx.moveTo(cx - r, cy - r * 0.7);
+    ctx.lineTo(cx + r, cy - r * 0.7);
+    ctx.lineTo(cx, cy + r);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = spec.color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, CONFIG.cellPx * 0.44, 0, Math.PI * 2 * Math.max(remain / CONFIG.bonusLifetime, 0));
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPlayer() {
+  const { x, y } = lerpCenter(player, playerStepMs());
+  const r = CONFIG.cellPx * 0.38;
+
+  // Active effects restyle the critter: cyan streak when fast, translucent
+  // violet when untouchable (blinking as the effect runs out)
+  let bodyColor = "#ffd23f";
+  let alpha = 1;
+  if (ghostActive()) {
+    bodyColor = BONUS_TYPES.ghost.color;
+    const remain = player.ghostUntil - game.time;
+    alpha = remain < 1.2 ? 0.35 + 0.4 * Math.sin(game.time * 20) ** 2 : 0.65;
+  } else if (speedActive()) {
+    bodyColor = BONUS_TYPES.speed.color;
+  }
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = bodyColor;
+  ctx.shadowColor = bodyColor;
+  ctx.shadowBlur = ghostActive() || speedActive() ? 16 : 10;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Eyes sit perpendicular to the heading; pupils track the nearest pellet
+  const dir = currentDir() || DIRS.right;
+  const target = nearestPelletTo(player);
+  let lookX = dir.x * r * 0.22;
+  let lookY = dir.y * r * 0.22;
+  if (target) {
+    const dx = (target.x + 0.5) * CONFIG.cellPx - x;
+    const dy = (target.y + 0.5) * CONFIG.cellPx - y;
+    const len = Math.hypot(dx, dy) || 1;
+    lookX = (dx / len) * r * 0.22;
+    lookY = (dy / len) * r * 0.22;
+  }
+  const eyeOffset = r * 0.42;
+  ctx.fillStyle = "#14171f";
+  const perp = { x: -dir.y, y: dir.x };
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.arc(x + perp.x * side * eyeOffset + lookX, y + perp.y * side * eyeOffset + lookY, r * 0.18, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function nearestPelletTo(p) {
+  const targets = [];
+  if (pellet) targets.push(pellet);
+  if (golden) targets.push(golden);
+  if (!targets.length) return null;
+  targets.sort((a, b) => dist(a.x, a.y, p.x, p.y) - dist(b.x, b.y, p.x, p.y));
+  return targets[0];
+}
+
+function drawGrid() {
+  const { gridSize, cellPx } = CONFIG;
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue("--grid-line");
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 1; i < gridSize; i++) {
+    const p = i * cellPx + 0.5;
+    ctx.moveTo(p, 0);
+    ctx.lineTo(p, canvas.height);
+    ctx.moveTo(0, p);
+    ctx.lineTo(canvas.width, p);
+  }
+  ctx.stroke();
+}
+
+function drawTitle() {
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#d8e0f0";
+  ctx.font = "700 42px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillText("RUN FROM SNAKE", canvas.width / 2, canvas.height / 2 - 20);
+  ctx.font = "18px 'Segoe UI', system-ui, sans-serif";
+  ctx.fillStyle = "#5c6780";
+  ctx.fillText("press any key to start", canvas.width / 2, canvas.height / 2 + 24);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Input — held-direction tracking + starting the run from the title screen
+// ---------------------------------------------------------------------------
+window.addEventListener("keydown", (e) => {
+  if (e.code === "KeyM") {
+    initAudio();
+    toggleMute();
+    return; // mute never starts or restarts a run
+  }
+  if (e.code === "KeyP") {
+    togglePause();
+    return;
+  }
+  if (game.state === State.PAUSED) return; // everything else waits
+  const dir = KEYMAP[e.code];
+  if (dir) {
+    e.preventDefault();
+    if (!heldDirs.includes(dir)) heldDirs.push(dir);
+  }
+  if (game.state === State.TITLE) {
+    resetRun();
+  } else if (game.state === State.DEAD &&
+             performance.now() - game.diedAt > CONFIG.deathInputLockMs) {
+    resetRun(); // instant restart, high score staring at you
+  }
+});
+
+window.addEventListener("keyup", (e) => {
+  const dir = KEYMAP[e.code];
+  if (!dir) return;
+  const i = heldDirs.indexOf(dir);
+  if (i !== -1) heldDirs.splice(i, 1);
+});
+
+// Dropped keyups (e.g. alt-tab mid-hold) would leave the critter running;
+// and a hunt you're not watching isn't a fair hunt — auto-pause
+window.addEventListener("blur", () => {
+  heldDirs.length = 0;
+  if (game.state === State.PLAYING) togglePause();
+});
+
+// ---------------------------------------------------------------------------
+// Boot — restore the high score from previous sessions
+// ---------------------------------------------------------------------------
+try {
+  game.best = parseInt(localStorage.getItem("runFromSnake.best"), 10) || 0;
+  music.muted = localStorage.getItem("runFromSnake.muted") === "1";
+} catch {}
+hud.best.textContent = game.best;
+document.getElementById("hint").textContent = hintText();
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

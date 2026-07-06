@@ -61,6 +61,16 @@
     "order": 30
   },
   {
+    "id": "2048-solver",
+    "name": "2048 Solver",
+    "description": "A playable 2048 paired with an expectimax solver that streams its expected-value math live — per-move EV, the 2-vs-4 chance-node split, and search stats. The search runs in a Web Worker and can take over on auto-play.",
+    "tech": ["TypeScript", "Expectimax", "Expected value", "Web Workers"],
+    "githubUrl": "https://github.com/wmitc/2048-Solver",
+    "icon": "grid",
+    "featured": true,
+    "order": 35
+  },
+  {
     "id": "perudo",
     "name": "Perudo Bot",
     "description": "Play the dice game Perudo against a bot that runs Bayesian updates on the hidden dice each round. Can you beat it?",
@@ -131,6 +141,16 @@
     "icon": "coins",
     "featured": false,
     "order": 100
+  },
+  {
+    "id": "run-from-snake",
+    "name": "Run From Snake",
+    "description": "Classic Snake, inverted — you're the apple, and an AI snake hunts you around the arena, growing and speeding up with every pellet you grab. A single self-contained HTML file with procedural chiptune.",
+    "tech": ["JavaScript", "HTML5 Canvas", "Game AI"],
+    "githubUrl": "https://github.com/wmitc/run-from-snake",
+    "icon": "snake",
+    "featured": false,
+    "order": 105
   },
   {
     "id": "alexa-game",

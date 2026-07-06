@@ -66,6 +66,7 @@
     "description": "A playable 2048 paired with an expectimax solver that streams its expected-value math live — per-move EV, the 2-vs-4 chance-node split, and search stats. The search runs in a Web Worker and can take over on auto-play.",
     "tech": ["TypeScript", "Expectimax", "Expected value", "Web Workers"],
     "githubUrl": "https://github.com/wmitc/2048-Solver",
+    "liveUrl": "/games/2048/index.html",
     "icon": "grid",
     "featured": true,
     "order": 35
@@ -148,6 +149,7 @@
     "description": "Classic Snake, inverted — you're the apple, and an AI snake hunts you around the arena, growing and speeding up with every pellet you grab. A single self-contained HTML file with procedural chiptune.",
     "tech": ["JavaScript", "HTML5 Canvas", "Game AI"],
     "githubUrl": "https://github.com/wmitc/run-from-snake",
+    "liveUrl": "/games/snake/index.html",
     "icon": "snake",
     "featured": false,
     "order": 105

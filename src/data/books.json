@@ -63,7 +63,7 @@
     "id": "angels-and-demons",
     "title": "Angels & Demons",
     "author": "Dan Brown",
-    "rating": 5.0,
+    "rating": 4.5,
     "yearRead": 2025,
     "genre": "Thriller",
     "notes": "The first Robert Langdon book, and in my opinion, the best one.",
@@ -150,16 +150,6 @@
     "favorite": false
   },
   {
-    "id": "1922",
-    "title": "1922",
-    "author": "Stephen King",
-    "rating": 3.0,
-    "yearRead": 2024,
-    "genre": "Psychological horror",
-    "notes": "Not memorable",
-    "favorite": false
-  },
-  {
     "id": "the-long-walk",
     "title": "The Long Walk",
     "author": "Stephen King",
@@ -198,5 +188,75 @@
     "genre": "Historical fiction",
     "notes": "It took me an entire year to read this book. It is an incredible tale of Hawaii, from the origin of the islands to the mid-1900s. One of James Michener's best.",
     "favorite": true
+  },
+  {
+    "id": "finders-keepers",
+    "title": "Finders Keepers",
+    "author": "Stephen King",
+    "rating": 5.0,
+    "yearRead": 2022,
+    "genre": "Mystery",
+    "notes": "An excellent read. Years later, I still vividly remember many details of the story.",
+    "favorite": true
+  },
+  {
+    "id": "mr-mercedes",
+    "title": "Mr. Mercedes",
+    "author": "Stephen King",
+    "rating": 4.0,
+    "yearRead": 2022,
+    "genre": "Mystery",
+    "notes": "Fun. Intriguing. A good read. The first in a series featuring detective Bill Hodges.",
+    "favorite": false
+  },
+  {
+    "id": "innocent-man",
+    "title": "The Innocent Man",
+    "author": "Josh Grisham",
+    "rating": 3.5,
+    "yearRead": 2022,
+    "genre": "True crime",
+    "notes": "Non-fiction tale about a man freed from conviction by DNA evidence after 11 years on death row.",
+    "favorite": false
+  },
+  {
+    "id": "end-of-watch",
+    "title": "End of Watch",
+    "author": "Stephen King",
+    "rating": 4.0,
+    "yearRead": 2022,
+    "genre": "Mystery",
+    "notes": "Third book in the Bill Hodges trilogy. It was decent, but I didn't care much for the paranormal activity content when the first two books didn't have any.",
+    "favorite": false
+  },
+  {
+    "id": "cujo",
+    "title": "Cujo",
+    "author": "Stephen King",
+    "rating": 2.0,
+    "yearRead": 2022,
+    "genre": "Horror",
+    "notes": "I heard positive things about this one, but it just did not land for me.",
+    "favorite": false
+  },
+  {
+    "id": "the-outsider",
+    "title": "The Outsider",
+    "author": "Stephen King",
+    "rating": 4.5,
+    "yearRead": 2022,
+    "genre": "Mystery",
+    "notes": "This one was pretty good. Quite a mystery and fairly entertaining throughout.",
+    "favorite": false
+  },
+  {
+    "id": "11-22-63",
+    "title": "11/22/63",
+    "author": "Stephen King",
+    "rating": 5.0,
+    "yearRead": 2021,
+    "genre": "Thriller",
+    "notes": "One of the best books I've ever read. A man goes back in time to attempt to prevent the assassination of President John F. Kennedy on 11/22/63. It's a lengthy book, but it hooks you in right away and there is rarely a dull moment.",
+    "favorite": false
   }
 ]

@@ -82,7 +82,7 @@
   },
   {
     "id": "boston-half",
-    "race": "Boston Half Marthon",
+    "race": "Boston Half Marathon",
     "distance": "Half marathon",
     "time": "1:30:15",
     "date": "2022-11-13",
@@ -91,7 +91,7 @@
   },
   {
     "id": "superhero-half",
-    "race": "Superhero Half Marthon",
+    "race": "Superhero Half Marathon",
     "distance": "Half marathon",
     "time": "1:21:11",
     "date": "2018-06-09",
@@ -117,8 +117,8 @@
     "pr": false
   },
   {
-    "id": "mt-sneffels-marathon",
-    "race": "Mt. Sneffel's Marathon",
+    "id": "mount-sneffels-marathon",
+    "race": "Mount Sneffel's Marathon",
     "distance": "Marathon",
     "time": "4:07:46",
     "date": "2017-08-12",

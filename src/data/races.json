@@ -5,7 +5,7 @@
     "distance": "5K",
     "time": "18:29",
     "date": "2024-06-01",
-    "location": "Boston",
+    "location": "Boston, MA",
     "pr": false
   },
   {
@@ -14,7 +14,7 @@
     "distance": "5K",
     "time": "18:04",
     "date": "2025-09-20",
-    "location": "Fort Meade",
+    "location": "Fort Meade, MD",
     "pr": false
   },
   {
@@ -23,7 +23,7 @@
     "distance": "5K",
     "time": "18:05",
     "date": "2024-09-07",
-    "location": "Fort Gordon",
+    "location": "Fort Gordon, GA",
     "pr": false
   },
   {
@@ -32,7 +32,7 @@
     "distance": "5K",
     "time": "18:40",
     "date": "2024-08-17",
-    "location": "Fort Meade",
+    "location": "Fort Meade, MD",
     "pr": false
   },
   {
@@ -41,7 +41,7 @@
     "distance": "5K",
     "time": "23:50",
     "date": "2023-06-10",
-    "location": "Boston",
+    "location": "Boston, MA",
     "pr": false
   },
   {
@@ -50,7 +50,7 @@
     "distance": "5K",
     "time": "21:41",
     "date": "2021-08-27",
-    "location": "Fort Carson",
+    "location": "Fort Carson, CO",
     "pr": false
   },
   {
@@ -59,7 +59,7 @@
     "distance": "5K",
     "time": "17:54",
     "date": "2025-10-25",
-    "location": "Fort Meade",
+    "location": "Fort Meade, MD",
     "pr": true
   },
   {
@@ -68,7 +68,7 @@
     "distance": "5K",
     "time": "18:17",
     "date": "2025-06-07",
-    "location": "Fort Meade",
+    "location": "Fort Meade, MD",
     "pr": false
   },
   {
@@ -77,7 +77,7 @@
     "distance": "Half marathon",
     "time": "1:18:55",
     "date": "2025-11-02",
-    "location": "Cambridge",
+    "location": "Cambridge, MA",
     "pr": true
   },
   {
@@ -86,7 +86,7 @@
     "distance": "Half marathon",
     "time": "1:30:15",
     "date": "2022-11-13",
-    "location": "Boston",
+    "location": "Boston, MA",
     "pr": false
   },
   {
@@ -95,7 +95,7 @@
     "distance": "Half marathon",
     "time": "1:21:11",
     "date": "2018-06-09",
-    "location": "San Francisco Bay Area",
+    "location": "Fremont, CA",
     "pr": false
   },
   {
@@ -104,7 +104,7 @@
     "distance": "Half marathon",
     "time": "1:26:21",
     "date": "2017-11-19",
-    "location": "Cambridge",
+    "location": "Cambridge, MA",
     "pr": false
   },
   {
@@ -131,7 +131,7 @@
     "distance": "Marathon",
     "time": "2:54:57",
     "date": "2024-05-12",
-    "location": "Carrabassett Valley, CE",
+    "location": "Carrabassett Valley, ME",
     "pr": true
   },
   {

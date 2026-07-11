@@ -1,5 +1,5 @@
 import { defineCollection, z } from "astro:content";
-import { file, glob } from "astro/loaders";
+import { file } from "astro/loaders";
 
 // Projects are edited as a single JSON data file: src/data/projects.json
 const projects = defineCollection({
@@ -36,18 +36,6 @@ const books = defineCollection({
   }),
 });
 
-// Blog posts: Markdown files in src/content/posts/
-const posts = defineCollection({
-  loader: glob({ pattern: "**/*.md", base: "src/content/posts" }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    date: z.coerce.date(),
-    tags: z.array(z.string()).default([]),
-    draft: z.boolean().default(false),
-  }),
-});
-
 // Race results, edited as a single JSON data file: src/data/races.json
 const races = defineCollection({
   loader: file("src/data/races.json"),
@@ -65,4 +53,4 @@ const races = defineCollection({
   }),
 });
 
-export const collections = { projects, books, posts, races };
+export const collections = { projects, books, races };

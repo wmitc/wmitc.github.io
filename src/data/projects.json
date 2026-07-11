@@ -46,7 +46,7 @@
     "description": "A Texas Hold'em bot that estimates hand equity with Monte Carlo simulation to drive its betting decisions.",
     "tech": ["Python", "Monte Carlo", "Game theory"],
     "githubUrl": "https://github.com/wmitc/poker-bot",
-    "icon": "cards",
+    "icon": "chip",
     "featured": true,
     "order": 20
   },
@@ -56,7 +56,7 @@
     "description": "Simulates card counting over many blackjack trials to quantify how the running count shifts expected value.",
     "tech": ["Python", "Simulation", "Probability"],
     "githubUrl": "https://github.com/wmitc/blackjack-sim",
-    "icon": "chip",
+    "icon": "cards",
     "featured": true,
     "order": 30
   },

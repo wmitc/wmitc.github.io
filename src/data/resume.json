@@ -6,13 +6,16 @@
       "school": "Massachusetts Institute of Technology",
       "credential": "M.Eng. '23 & B.S. '19, Computer Science and Engineering",
       "dates": "2015 — 2019, 2022 — 2023",
-      "details": "Minor: Mathematics · M.Eng. GPA 4.5/5.0 · B.S. GPA 4.3/5.0. Coursework: Statistical Data Analysis, Probability & Random Variables, Machine Learning, Natural Language Processing, Design & Analysis of Algorithms, Linear Algebra."
-    },  
+      "minor": "Minor: Mathematics",
+      "details": "M.Eng. GPA 4.5/5.0 · B.S. GPA 4.3/5.0",
+      "coursework": "Statistical Data Analysis, Probability & Random Variables, Machine Learning, Natural Language Processing, Design & Analysis of Algorithms, Linear Algebra"
+    },
     {
       "school": "Georgia Institute of Technology",
       "credential": "M.S., Cybersecurity",
-      "dates": "Expected Dec 2026",
-      "details": "GPA 4.0/4.0 · Coursework: Machine Learning for Trading."
+      "dates": "Expected May 2027",
+      "details": "GPA 4.0/4.0",
+      "coursework": "Machine Learning for Trading, Computer Networks, Applied Cryptography, Binary Exploitation Laboratory"
     }
   ],
   "experience": [

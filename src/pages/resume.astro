@@ -43,7 +43,13 @@ import resume from "../data/resume.json";
               <span class="dates muted">{ed.dates}</span>
             </div>
             <p class="cred">{ed.credential}</p>
-            {ed.details && <p class="muted">{ed.details}</p>}
+            {ed.minor && <p class="muted edu-line">{ed.minor}</p>}
+            {ed.details && <p class="muted edu-line">{ed.details}</p>}
+            {ed.coursework && (
+              <p class="muted edu-line">
+                <span class="cw-label">Coursework:</span> {ed.coursework}
+              </p>
+            )}
           </div>
         ))
       }
@@ -161,6 +167,12 @@ import resume from "../data/resume.json";
   }
   .cred {
     margin: 0.15rem 0;
+  }
+  .edu-line {
+    margin: 0.2rem 0 0;
+  }
+  .cw-label {
+    font-weight: 600;
   }
   .entry ul {
     margin: 0.4rem 0 0;

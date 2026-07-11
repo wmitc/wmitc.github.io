@@ -54,7 +54,7 @@
     color: var(--accent);
     text-shadow: 0 0 14px rgba(57, 255, 136, 0.45);
   }
-  .stat label {
+  .stat label, #legend > label {
     display: block;
     font-size: 12px;
     letter-spacing: 0.14em;
@@ -62,6 +62,20 @@
     color: #5c6780;
     margin-bottom: 2px;
   }
+  #legend-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12.5px;
+    color: #8a95ad;
+    max-width: 210px;
+  }
+  .legend-row canvas { flex: none; }
   .stat .value {
     color: var(--accent);
     font-weight: 700;
@@ -101,6 +115,10 @@
         <div class="value" id="pellets">0</div>
       </div>
       <div id="powerup"></div>
+      <div id="legend">
+        <label>Key</label>
+        <div id="legend-rows"></div>
+      </div>
       <div id="hint">WASD / arrows to move — you are the apple. Run.</div>
     </aside>
   </div>
@@ -118,27 +136,28 @@ const CONFIG = {
   playerStepMs: 110,     // ms per grid step while a direction is held
   snakeStepMs: 200,      // starting ms per snake step (speeds up per pellet)
   snakeStartLength: 4,
-  snakeSpeedupMs: 3,     // snake step interval shrinks this much per pellet
+  snakeSpeedupMs: 2,     // snake step interval shrinks this much per pellet
   snakeStepMsFloor: 130, // snake never gets faster than this (player is 110)
   pelletScore: 10,
   pelletMinDistPlayer: 4,    // don't spawn pellets in the player's lap...
   pelletMinDistSnakeHead: 5, // ...or in the snake's jaws
   tier1Pellets: 10,          // snake starts mixing in BFS lookahead
   tier2Pellets: 20,          // BFS most moves
-  secondSnakePellets: 30,    // a second, shorter snake joins the hunt
+  secondSnakePellets: 15,    // a second, shorter snake joins the hunt
   secondSnakeHandicapMs: 40, // the newcomer starts slower than the veteran
   goldenScore: 50,           // 5x — the greed tax
   goldenEveryMin: 6,         // golden pellet due every 6-10 normal pellets
   goldenEveryMax: 10,
   goldenLifetime: 6,         // seconds before it despawns
-  bonusEveryMin: 6,          // bonus pellet due every 6-10 normal pellets
-  bonusEveryMax: 10,
+  bonusEveryMin: 3,          // bonus pellet due every 3-4 normal pellets
+  bonusEveryMax: 4,
   bonusLifetime: 8,          // seconds before it despawns
   speedBoostStepMs: 80,      // boosted player step (normal is 110)
-  speedBoostDur: 5,          // seconds of boost
-  ghostDur: 4,               // seconds of invincibility
-  freezeDur: 2.5,            // seconds all snakes stand still
-  shrinkSegments: 6,         // segments each snake loses to a shrink pellet
+  speedBoostDur: 7,          // seconds of boost
+  ghostDur: 6,               // seconds of invincibility
+  freezeDur: 3.5,            // seconds all snakes stand still
+  slowDur: 6,                // seconds all snakes move at slowFactor pace
+  slowFactor: 0.5,
   deathSlowmo: 0.15,         // time scale during the death cam
   deathCamSecs: 0.8,         // real-time length of the death cam
   nearMissShake: 4,          // px of screen shake when the head grazes you
@@ -178,6 +197,7 @@ const game = {
   diedAt: 0,   // wall-clock ms of death, for restart input lockout
   dyingTimer: 0, // real seconds elapsed in the death cam
   freezeUntil: 0, // game.time until which all snakes stand still
+  slowUntil: 0,   // game.time until which all snakes crawl at slowFactor
   announce: null, // {text, until} — brief center-screen telegraph
 };
 
@@ -413,8 +433,9 @@ function stepSnake(snake) {
 
 function updateSnakes(dtMs) {
   if (freezeActive()) return; // step timers hold; they thaw mid-stride
+  const pace = slowActive() ? CONFIG.slowFactor : 1; // slowed time runs thick
   for (const snake of snakes) {
-    snake.stepTimer += dtMs;
+    snake.stepTimer += dtMs * pace;
     while (snake.stepTimer >= snake.stepMs) {
       snake.stepTimer -= snake.stepMs;
       stepSnake(snake);
@@ -559,17 +580,16 @@ const BONUS_TYPES = {
   speed:  { color: "#3fd8ff", label: "speed boost" },
   ghost:  { color: "#c07dff", label: "ghost" },
   freeze: { color: "#d9f2ff", label: "freeze" },
-  shrink: { color: "#ff9f40", label: "shrink" },
+  slow:   { color: "#ff9f40", label: "slow" },
 };
 
-// Weighted pick: shrink is the only thing that undoes your mistakes, so
-// it's the rarest
+// Flat pick — every type is a timed reprieve now, none outclasses the rest
 function rollBonusType() {
   const r = Math.random();
-  if (r < 0.30) return "speed";
-  if (r < 0.60) return "ghost";
-  if (r < 0.85) return "freeze";
-  return "shrink";
+  if (r < 0.25) return "speed";
+  if (r < 0.50) return "ghost";
+  if (r < 0.75) return "freeze";
+  return "slow";
 }
 
 let bonus = null; // {type, x, y, expiresAt}
@@ -605,36 +625,24 @@ function updateBonus() {
 function speedActive() { return game.time < player.speedUntil; }
 function ghostActive() { return game.time < player.ghostUntil; }
 function freezeActive() { return game.time < game.freezeUntil; }
+function slowActive() { return game.time < game.slowUntil; }
 
 function collectBonus() {
   const type = bonus.type;
   bonus = null;
+  game.score += CONFIG.pelletScore; // worth a normal pellet, minus the growth
+  hud.score.textContent = game.score;
   if (type === "speed") {
     player.speedUntil = game.time + CONFIG.speedBoostDur;
   } else if (type === "ghost") {
     player.ghostUntil = game.time + CONFIG.ghostDur;
   } else if (type === "freeze") {
     game.freezeUntil = game.time + CONFIG.freezeDur;
-  } else if (type === "shrink") {
-    shrinkSnakes();
+  } else if (type === "slow") {
+    game.slowUntil = game.time + CONFIG.slowDur;
   }
   announce(BONUS_TYPES[type].label + "!", 1.2);
   playBonusSfx(type);
-}
-
-// The one mercy in the game: every snake sheds segments, no score price.
-// Owed growth is cancelled before real segments come off.
-function shrinkSnakes() {
-  for (const snake of snakes) {
-    let toRemove = CONFIG.shrinkSegments;
-    const cancelled = Math.min(toRemove, snake.pendingGrowth);
-    snake.pendingGrowth -= cancelled;
-    toRemove -= cancelled;
-    while (toRemove-- > 0 && snake.segments.length > 2) {
-      snake.segments.pop();
-      snake.prevSegments.pop();
-    }
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -675,6 +683,9 @@ function updatePowerupHud() {
   } else if (freezeActive()) {
     text = `freeze ${(game.freezeUntil - game.time).toFixed(1)}s`;
     color = BONUS_TYPES.freeze.color;
+  } else if (slowActive()) {
+    text = `slow ${(game.slowUntil - game.time).toFixed(1)}s`;
+    color = BONUS_TYPES.slow.color;
   } else if (speedActive()) {
     text = `speed ${(player.speedUntil - game.time).toFixed(1)}s`;
     color = BONUS_TYPES.speed.color;
@@ -826,7 +837,7 @@ function playBonusSfx(type) {
     blip(2093, t + 0.08, 0.16, "triangle", 0.3);
     blip(2637, t + 0.16, 0.28, "triangle", 0.25);
   } else {
-    // descending pop-pop-pop — segments falling off
+    // descending pop-pop-pop — the hunt winding down
     blip(660, t, 0.08, "square", 0.26);
     blip(494, t + 0.09, 0.08, "square", 0.26);
     blip(330, t + 0.18, 0.16, "square", 0.26);
@@ -883,6 +894,7 @@ function resetRun() {
   game.time = 0;
   game.announce = null;
   game.freezeUntil = 0;
+  game.slowUntil = 0;
   hud.score.textContent = "0";
   hud.pellets.textContent = "0";
   resetPlayer();
@@ -1069,10 +1081,11 @@ function drawSnake(snake) {
   }
 
   // Neon body with a brighter head; a freshly snapped-on tail segment
-  // flashes white so you watch your mistake grow. Frozen snakes go icy.
+  // flashes white so you watch your mistake grow. Frozen snakes go icy;
+  // slowed ones smolder orange.
   const frozen = freezeActive();
   const snapAge = game.time - (snake.grewAt || -1);
-  ctx.shadowColor = frozen ? "#bfe8ff" : "#39ff88";
+  ctx.shadowColor = frozen ? "#bfe8ff" : slowActive() ? "#ff9f40" : "#39ff88";
   for (let i = snake.segments.length - 1; i >= 0; i--) {
     const cur = snake.segments[i];
     const prev = snake.prevSegments[i] || cur;
@@ -1132,8 +1145,52 @@ function drawGameOver() {
   ctx.restore();
 }
 
-// Bonus pellets: speed is a cyan diamond, ghost a hollow violet ring —
-// both with the golden pellet's shrinking timer arc
+// One glyph per bonus type, on any 2D context — the arena and the
+// side-panel key both draw with this, so they can never drift apart
+function drawBonusGlyph(g, type, cx, cy, r, spin = 0) {
+  const spec = BONUS_TYPES[type];
+  if (type === "speed") {
+    // cyan diamond
+    g.fillStyle = spec.color;
+    g.beginPath();
+    g.moveTo(cx, cy - r);
+    g.lineTo(cx + r, cy);
+    g.lineTo(cx, cy + r);
+    g.lineTo(cx - r, cy);
+    g.closePath();
+    g.fill();
+  } else if (type === "ghost") {
+    // violet ring
+    g.strokeStyle = spec.color;
+    g.lineWidth = r * 0.45;
+    g.beginPath();
+    g.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
+    g.stroke();
+  } else if (type === "freeze") {
+    // six-spoke ice crystal
+    g.strokeStyle = spec.color;
+    g.lineWidth = r * 0.33;
+    g.beginPath();
+    for (let k = 0; k < 3; k++) {
+      const a = spin + (k * Math.PI) / 3;
+      g.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r);
+      g.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    g.stroke();
+  } else {
+    // orange hourglass — the snakes' time runs thick
+    g.fillStyle = spec.color;
+    g.beginPath();
+    g.moveTo(cx - r * 0.8, cy - r);
+    g.lineTo(cx + r * 0.8, cy - r);
+    g.lineTo(cx - r * 0.8, cy + r);
+    g.lineTo(cx + r * 0.8, cy + r);
+    g.closePath();
+    g.fill();
+  }
+}
+
+// Bonus pellets in the arena, with the golden pellet's shrinking timer arc
 function drawBonus() {
   if (!bonus) return;
   const spec = BONUS_TYPES[bonus.type];
@@ -1147,44 +1204,7 @@ function drawBonus() {
   ctx.globalAlpha = remain < 2 ? 0.55 + 0.45 * Math.sin(game.time * 24) ** 2 : 1;
   ctx.shadowColor = spec.color;
   ctx.shadowBlur = 14;
-  if (bonus.type === "speed") {
-    // cyan diamond
-    ctx.fillStyle = spec.color;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - r);
-    ctx.lineTo(cx + r, cy);
-    ctx.lineTo(cx, cy + r);
-    ctx.lineTo(cx - r, cy);
-    ctx.closePath();
-    ctx.fill();
-  } else if (bonus.type === "ghost") {
-    // violet ring
-    ctx.strokeStyle = spec.color;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
-    ctx.stroke();
-  } else if (bonus.type === "freeze") {
-    // six-spoke ice crystal
-    ctx.strokeStyle = spec.color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    for (let k = 0; k < 3; k++) {
-      const a = game.time * 0.8 + (k * Math.PI) / 3;
-      ctx.moveTo(cx - Math.cos(a) * r, cy - Math.sin(a) * r);
-      ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-    }
-    ctx.stroke();
-  } else {
-    // orange down-triangle — the snake gets smaller
-    ctx.fillStyle = spec.color;
-    ctx.beginPath();
-    ctx.moveTo(cx - r, cy - r * 0.7);
-    ctx.lineTo(cx + r, cy - r * 0.7);
-    ctx.lineTo(cx, cy + r);
-    ctx.closePath();
-    ctx.fill();
-  }
+  drawBonusGlyph(ctx, bonus.type, cx, cy, r, game.time * 0.8);
   ctx.shadowBlur = 0;
   ctx.strokeStyle = spec.color;
   ctx.lineWidth = 2;
@@ -1319,6 +1339,43 @@ window.addEventListener("blur", () => {
   heldDirs.length = 0;
   if (game.state === State.PLAYING) togglePause();
 });
+
+// ---------------------------------------------------------------------------
+// Side-panel key — one row per thing you can eat. Icons are rendered by the
+// game's own drawing code onto tiny canvases, so they always match the arena.
+// ---------------------------------------------------------------------------
+function buildLegend() {
+  const rows = [
+    { icon: g => { g.shadowColor = g.fillStyle = "#ff4d5e"; g.beginPath(); g.arc(11, 11, 6, 0, Math.PI * 2); g.fill(); },
+      text: `pellet — +${CONFIG.pelletScore}, feeds the snake` },
+    { icon: g => { g.shadowColor = g.fillStyle = "#ffd23f"; g.beginPath(); g.arc(11, 11, 7, 0, Math.PI * 2); g.fill(); },
+      text: `golden — +${CONFIG.goldenScore}, vanishes fast` },
+    { type: "speed",  text: `speed boost — you, for ${CONFIG.speedBoostDur}s` },
+    { type: "ghost",  text: `ghost — untouchable for ${CONFIG.ghostDur}s` },
+    { type: "freeze", text: `freeze — snakes halt for ${CONFIG.freezeDur}s` },
+    { type: "slow",   text: `slow — snakes at half pace for ${CONFIG.slowDur}s` },
+  ];
+  const box = document.getElementById("legend-rows");
+  for (const row of rows) {
+    const div = document.createElement("div");
+    div.className = "legend-row";
+    const c = document.createElement("canvas");
+    c.width = c.height = 22;
+    const g = c.getContext("2d");
+    g.shadowBlur = 5;
+    if (row.type) {
+      g.shadowColor = BONUS_TYPES[row.type].color;
+      drawBonusGlyph(g, row.type, 11, 11, 7, Math.PI / 7);
+    } else {
+      row.icon(g);
+    }
+    const span = document.createElement("span");
+    span.textContent = row.text;
+    div.append(c, span);
+    box.appendChild(div);
+  }
+}
+buildLegend();
 
 // ---------------------------------------------------------------------------
 // Boot — restore the high score from previous sessions

@@ -47,6 +47,16 @@
     "yearRead": 2026,
     "genre": "Thriller",
     "notes": "Pretty good one. Another Robert Langdon book.",
+    "favorite": false
+  },
+  {
+    "id": "lost-symbol",
+    "title": "The Lost Symbol",
+    "author": "Dan Brown",
+    "rating": 4.0,
+    "yearRead": 2026,
+    "genre": "Thriller",
+    "notes": "I liked this one. Lots of history about the Freemasonry.",
     "favorite": true
   },
   {
@@ -66,7 +76,7 @@
     "rating": 4.5,
     "yearRead": 2025,
     "genre": "Thriller",
-    "notes": "The first Robert Langdon book, and in my opinion, the best one.",
+    "notes": "The first Robert Langdon book, and in my opinion, the best one. Covered a lot of history of the Illuminati.",
     "favorite": true
   },
   {
